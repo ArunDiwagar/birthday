@@ -1,0 +1,3640 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Happy Birthday, Kowsy &mdash; The Monument of Our Love</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800;900&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Manrope:wght@400;500;600;700&family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap"
+    rel="stylesheet">
+
+  <!-- Three.js & GSAP CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script>if (typeof THREE !== 'undefined' && typeof OrbitControls !== 'undefined' && !THREE.OrbitControls) { THREE.OrbitControls = OrbitControls; }</script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #fff5f1;
+      --bg-soft: #ffe9e6;
+      --paper: #fffaf8;
+      --ink: #2b0f18;
+      --ink-soft: #6b4652;
+      --rose: #c9184a;
+      --rose-deep: #8c0f37;
+      --rose-soft: #ff758f;
+      --blush: #ffb4c2;
+      --gold: #cf9c53;
+      --gold-light: #f7d794;
+      --line: rgba(43, 15, 24, 0.12);
+      --shadow: 0 18px 40px rgba(140, 15, 55, 0.12);
+      --font-display: "Fraunces", "Iowan Old Style", "Palatino Linotype", serif;
+      --font-taj: 'Cinzel', serif;
+      --font-body: "Manrope", "Segoe UI", system-ui, sans-serif;
+    }
+
+    :root:not([data-theme="light"]) {
+      @media (prefers-color-scheme: dark) {
+        --bg: #22091a;
+        --bg-soft: #2f0f22;
+        --paper: #2a0f1e;
+        --ink: #ffe9ec;
+        --ink-soft: #e3b6c2;
+        --rose: #ff7ba0;
+        --rose-deep: #ffa4bd;
+        --blush: #ff9fb2;
+        --gold: #e7c078;
+        --line: rgba(255, 233, 236, 0.16);
+        --shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+      }
+    }
+
+    :root[data-theme="dark"] {
+      --bg: #22091a;
+      --bg-soft: #2f0f22;
+      --paper: #2a0f1e;
+      --ink: #ffe9ec;
+      --ink-soft: #e3b6c2;
+      --rose: #ff7ba0;
+      --rose-deep: #ffa4bd;
+      --blush: #ff9fb2;
+      --gold: #e7c078;
+      --line: rgba(255, 233, 236, 0.16);
+      --shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--font-body);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    img {
+      max-width: 100%;
+    }
+
+    section {
+      position: relative;
+      padding: 96px 24px;
+      max-width: 900px;
+      margin: 0 auto;
+      z-index: 2;
+    }
+
+    h1,
+    h2,
+    h3 {
+      font-family: var(--font-display);
+      font-weight: 600;
+      margin: 0 0 0.3em;
+      color: var(--ink);
+    }
+
+    p {
+      margin: 0 0 1em;
+      color: var(--ink-soft);
+    }
+
+    .eyebrow {
+      font-family: var(--font-display);
+      font-style: italic;
+      font-weight: 500;
+      color: var(--rose);
+      font-size: 1.05rem;
+      margin-bottom: 0.6em;
+    }
+
+    /* ============================================================
+     TAJ MAHAL ANIME-STYLE CINEMATIC OVERLAY UI
+  ============================================================ */
+
+    /* === CONTAINER & VIEWPORT === */
+    #taj-experience {
+      position: relative;
+      width: 100%;
+      height: 520vh;
+      /* 5.2 screens of scroll distance to drive camera smoothly */
+      background: #0a040b;
+      z-index: 10;
+    }
+
+    .taj-viewport {
+      position: sticky;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    #taj-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      display: block;
+      outline: none;
+    }
+
+    .taj-ui {
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 24px 32px;
+    }
+
+    /* === TOP TITLE BAR === */
+    .taj-topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      width: 100%;
+      pointer-events: auto;
+    }
+
+    .taj-brand {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .taj-brand-title {
+      font-family: var(--font-taj);
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      background: linear-gradient(100deg, #fffaf0 0%, var(--gold-light) 55%, var(--gold) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+      filter: drop-shadow(0 0 14px rgba(223, 177, 91, 0.55));
+    }
+
+    .taj-brand-sub {
+      font-family: var(--font-body);
+      font-size: 0.66rem;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: rgba(247, 215, 148, 0.7);
+      margin-top: 1px;
+    }
+
+    /* Animated ornamental divider under title */
+    .taj-brand::after {
+      content: '';
+      display: block;
+      margin-top: 6px;
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(90deg, var(--gold) 0%, rgba(247, 215, 148, 0.3) 70%, transparent 100%);
+      animation: shimmerLine 3s ease-in-out infinite;
+    }
+
+    @keyframes shimmerLine {
+
+      0%,
+      100% {
+        opacity: 0.6;
+      }
+
+      50% {
+        opacity: 1;
+        filter: brightness(1.4);
+      }
+    }
+
+    /* === SOUND BUTTON === */
+    .btn-hud {
+      background: rgba(10, 4, 10, 0.55);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(223, 177, 91, 0.28);
+      color: rgba(247, 215, 148, 0.9);
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-family: var(--font-body);
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      pointer-events: auto;
+    }
+
+    .btn-hud:hover {
+      background: rgba(223, 177, 91, 0.18);
+      border-color: var(--gold);
+      color: #fff;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5), 0 0 18px rgba(223, 177, 91, 0.25);
+    }
+
+    /* === SIDE CHAPTER DOT PROGRESS === */
+    .taj-chapter-dots {
+      position: absolute;
+      right: 26px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      z-index: 25;
+      pointer-events: auto;
+    }
+
+    .taj-chapter-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.25);
+      border: 1.5px solid rgba(223, 177, 91, 0.4);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      cursor: pointer;
+    }
+
+    .taj-chapter-dot:hover {
+      background: var(--gold-light);
+      transform: scale(1.3);
+      box-shadow: 0 0 10px rgba(247, 215, 148, 0.7);
+    }
+
+    .taj-chapter-dot.active {
+      width: 8px;
+      height: 28px;
+      border-radius: 6px;
+      background: linear-gradient(180deg, var(--gold-light), var(--rose));
+      border-color: transparent;
+      box-shadow: 0 0 12px rgba(207, 156, 83, 0.7), 0 0 28px rgba(201, 24, 74, 0.3);
+    }
+
+    .taj-chapter-dot-label {
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-family: var(--font-taj);
+      font-size: 0.62rem;
+      letter-spacing: 0.18em;
+      color: rgba(247, 215, 148, 0.75);
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.35s ease, transform 0.35s ease;
+      pointer-events: none;
+      background: rgba(10, 4, 12, 0.6);
+      padding: 2px 8px;
+      border-radius: 4px;
+      border: 1px solid rgba(223, 177, 91, 0.2);
+    }
+
+    .taj-chapter-dot:hover .taj-chapter-dot-label,
+    .taj-chapter-dot.active .taj-chapter-dot-label {
+      opacity: 1;
+      transform: translateY(-50%) translateX(-2px);
+    }
+
+    /* === BOTTOM CINEMATIC CHAPTER SUBTITLE BAR === */
+    .taj-cinematic-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 20;
+      pointer-events: none;
+    }
+
+    /* Vignette at bottom for contrast */
+    .taj-cinematic-bar::before {
+      content: '';
+      display: block;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 260px;
+      background: linear-gradient(to top, rgba(6, 2, 8, 0.88) 0%, rgba(8, 3, 12, 0.55) 40%, transparent 100%);
+      pointer-events: none;
+    }
+
+    /* Letterbox bars — anime film style */
+    .taj-letterbox-top,
+    .taj-letterbox-bottom {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 54px;
+      background: #040108;
+      z-index: 22;
+      pointer-events: none;
+    }
+
+    .taj-letterbox-top {
+      top: 0;
+    }
+
+    .taj-letterbox-bottom {
+      bottom: 0;
+    }
+
+    /* Chapter display inside the cinematic bar */
+    .taj-chapter-display {
+      position: absolute;
+      bottom: 62px;
+      left: 0;
+      right: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      pointer-events: none;
+      z-index: 21;
+    }
+
+    .taj-chapter-num {
+      font-family: var(--font-taj);
+      font-size: 0.6rem;
+      letter-spacing: 0.38em;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: 0.85;
+      transition: opacity 0.5s ease;
+    }
+
+    .taj-chapter-title {
+      font-family: var(--font-taj);
+      font-size: clamp(1.05rem, 2.4vw, 1.45rem);
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-align: center;
+      color: #fffaf5;
+      text-shadow: 0 2px 18px rgba(0, 0, 0, 1), 0 0 30px rgba(223, 177, 91, 0.4);
+      padding: 0 24px;
+      transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .taj-chapter-desc {
+      font-family: var(--font-body);
+      font-size: clamp(0.76rem, 1.4vw, 0.88rem);
+      font-weight: 400;
+      color: rgba(255, 220, 210, 0.72);
+      text-align: center;
+      letter-spacing: 0.04em;
+      max-width: 560px;
+      line-height: 1.55;
+      padding: 0 32px;
+      text-shadow: 0 1px 8px rgba(0, 0, 0, 0.9);
+      transition: opacity 0.55s ease;
+    }
+
+    /* Fade transition helper */
+    .taj-chapter-display.fading .taj-chapter-title,
+    .taj-chapter-display.fading .taj-chapter-num,
+    .taj-chapter-display.fading .taj-chapter-desc {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+
+    /* Final 'Continue' button — shown only at the end */
+    .taj-continue-btn {
+      margin-top: 14px;
+      background: linear-gradient(135deg, rgba(201, 24, 74, 0.85), rgba(140, 15, 55, 0.9));
+      border: 1px solid rgba(255, 160, 185, 0.4);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      color: #fff;
+      font-family: var(--font-body);
+      font-size: 0.88rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      padding: 11px 28px;
+      border-radius: 999px;
+      cursor: pointer;
+      box-shadow: 0 8px 28px rgba(140, 15, 55, 0.5), 0 0 24px rgba(201, 24, 74, 0.25);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      opacity: 0;
+      transform: translateY(10px);
+      pointer-events: none;
+      position: relative;
+      z-index: 22;
+    }
+
+    .taj-continue-btn.visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .taj-continue-btn:hover {
+      background: linear-gradient(135deg, #e01e5a, #a61242);
+      box-shadow: 0 12px 36px rgba(201, 24, 74, 0.6), 0 0 32px rgba(255, 107, 139, 0.3);
+      transform: translateY(-2px);
+    }
+
+    /* Explore button */
+    .taj-explore-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(223, 177, 91, 0.35);
+      color: rgba(247, 215, 148, 0.9);
+      font-family: var(--font-body);
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      padding: 9px 20px;
+      border-radius: 999px;
+      cursor: pointer;
+      margin-top: 8px;
+      backdrop-filter: blur(12px);
+      transition: all 0.3s ease;
+      opacity: 0;
+      transform: translateY(10px);
+      pointer-events: none;
+      position: relative;
+      z-index: 22;
+    }
+
+    .taj-explore-btn.visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .taj-explore-btn:hover {
+      background: rgba(223, 177, 91, 0.18);
+      border-color: var(--gold);
+      color: #fff;
+    }
+
+    /* === SCROLL INDICATOR === */
+    .taj-scroll-indicator {
+      position: absolute;
+      bottom: 66px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 7px;
+      color: rgba(247, 215, 148, 0.7);
+      font-family: var(--font-body);
+      font-size: 0.68rem;
+      letter-spacing: 0.26em;
+      text-transform: uppercase;
+      pointer-events: none;
+      z-index: 22;
+      transition: opacity 0.5s ease;
+      animation: pulseUpDown 2.4s ease-in-out infinite;
+    }
+
+    .taj-scroll-chevrons {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      align-items: center;
+    }
+
+    .taj-scroll-chevrons span {
+      display: block;
+      width: 14px;
+      height: 7px;
+      border-right: 1.5px solid rgba(247, 215, 148, 0.55);
+      border-bottom: 1.5px solid rgba(247, 215, 148, 0.55);
+      transform: rotate(45deg);
+      animation: chevronFade 1.8s ease-in-out infinite;
+    }
+
+    .taj-scroll-chevrons span:nth-child(2) {
+      animation-delay: 0.18s;
+      opacity: 0.7;
+    }
+
+    .taj-scroll-chevrons span:nth-child(3) {
+      animation-delay: 0.36s;
+      opacity: 0.4;
+    }
+
+    @keyframes chevronFade {
+
+      0%,
+      100% {
+        opacity: 0.25;
+      }
+
+      50% {
+        opacity: 1;
+      }
+    }
+
+    @keyframes pulseUpDown {
+
+      0%,
+      100% {
+        transform: translateX(-50%) translateY(0);
+      }
+
+      50% {
+        transform: translateX(-50%) translateY(5px);
+      }
+    }
+
+    /* Orbit hint pill */
+    #taj-orbit-hint {
+      position: absolute;
+      bottom: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(10, 4, 12, 0.75);
+      backdrop-filter: blur(18px);
+      border: 1px solid rgba(223, 177, 91, 0.28);
+      border-radius: 999px;
+      padding: 10px 22px;
+      font-family: var(--font-body);
+      font-size: 0.78rem;
+      color: rgba(247, 215, 148, 0.85);
+      z-index: 25;
+      display: none;
+      box-shadow: 0 8px 26px rgba(0, 0, 0, 0.6);
+      letter-spacing: 0.04em;
+    }
+
+    /* === MOBILE === */
+    @media (max-width: 600px) {
+      .taj-ui {
+        padding: 14px 16px;
+      }
+
+      .taj-brand-title {
+        font-size: 0.85rem;
+      }
+
+      .taj-brand-sub {
+        font-size: 0.58rem;
+      }
+
+      .btn-hud {
+        font-size: 0.72rem;
+        padding: 6px 12px;
+        gap: 5px;
+      }
+
+      .taj-chapter-dots {
+        right: 12px;
+      }
+
+      .taj-chapter-title {
+        font-size: clamp(0.95rem, 4vw, 1.15rem);
+      }
+
+      .taj-chapter-desc {
+        font-size: 0.75rem;
+      }
+
+      .taj-continue-btn {
+        font-size: 0.8rem;
+        padding: 10px 22px;
+      }
+
+      .taj-letterbox-top,
+      .taj-letterbox-bottom {
+        height: 38px;
+      }
+    }
+
+    /* ============================================================
+     2. ORIGINAL BIRTHDAY SITE STYLING
+  ============================================================ */
+    /* floating hearts */
+    .hearts {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .hearts span {
+      position: absolute;
+      bottom: -10%;
+      font-size: 1.4rem;
+      color: var(--blush);
+      opacity: 0.55;
+      animation: rise linear forwards;
+    }
+
+    @keyframes rise {
+      0% {
+        transform: translateY(0) translateX(0) rotate(0deg);
+        opacity: 0;
+      }
+
+      10% {
+        opacity: 0.6;
+      }
+
+      100% {
+        transform: translateY(-115vh) translateX(var(--drift, 20px)) rotate(25deg);
+        opacity: 0;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .hearts {
+        display: none;
+      }
+    }
+
+    /* hero */
+    .hero {
+      min-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      max-width: 1000px;
+      padding: 60px 24px 40px;
+    }
+
+    .hero .eyebrow {
+      letter-spacing: 0.02em;
+    }
+
+    .hero h1 {
+      font-size: clamp(3rem, 9vw, 6.2rem);
+      line-height: 0.98;
+      margin-bottom: 0.25em;
+    }
+
+    .hero h1 em {
+      font-style: italic;
+      color: var(--rose);
+    }
+
+    .hero .sub {
+      font-size: clamp(1.05rem, 2vw, 1.3rem);
+      max-width: 42ch;
+      margin: 0 auto 2.2em;
+    }
+
+    .years-badge {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 14px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 14px 30px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+    }
+
+    .years-badge .num {
+      font-family: var(--font-display);
+      font-size: 2.6rem;
+      color: var(--rose);
+      font-weight: 600;
+    }
+
+    .years-badge .lbl {
+      font-size: 0.95rem;
+      color: var(--ink-soft);
+      text-align: left;
+      max-width: 12ch;
+    }
+
+    .scroll-cue {
+      margin-top: 56px;
+      font-size: 0.85rem;
+      color: var(--ink-soft);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .scroll-cue .line {
+      width: 1px;
+      height: 34px;
+      background: linear-gradient(var(--rose), transparent);
+    }
+
+    /* since / age stats */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      text-align: center;
+    }
+
+    .countdown-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .stat {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .stat-num {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 6vw, 2.8rem);
+      color: var(--rose);
+      font-variant-numeric: tabular-nums;
+      transition: transform .15s ease;
+    }
+
+    .stat-num.tick {
+      transform: scale(1.12);
+    }
+
+    .stat-lbl {
+      font-size: 0.82rem;
+      color: var(--ink-soft);
+    }
+
+    .stat-sub {
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--ink-soft);
+      margin-top: 6px;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--line);
+      margin: 28px 0 22px;
+    }
+
+    .countdown-head {
+      text-align: center;
+      font-family: var(--font-display);
+      font-style: italic;
+      color: var(--rose);
+      margin-bottom: 16px;
+    }
+
+    .zodiac-line {
+      text-align: center;
+      margin: 26px 0 0;
+      font-size: 0.9rem;
+    }
+
+    /* timeline */
+    .timeline {
+      counter-reset: yr;
+    }
+
+    .timeline .item {
+      counter-increment: yr;
+      display: grid;
+      grid-template-columns: 64px 1fr;
+      gap: 20px;
+      padding: 28px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .timeline .item:last-child {
+      border-bottom: 1px solid var(--line);
+    }
+
+    .timeline .item .mark {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      color: var(--rose);
+      font-weight: 600;
+    }
+
+    .timeline .item .mark::before {
+      content: "0" counter(yr);
+    }
+
+    .timeline .item h3 {
+      font-size: 1.3rem;
+      margin-bottom: 0.2em;
+    }
+
+    .timeline .item p {
+      margin: 0;
+    }
+
+    /* quiz & common card */
+    .card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 36px;
+      box-shadow: var(--shadow);
+    }
+
+    .quiz-progress {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 26px;
+    }
+
+    .quiz-progress i {
+      flex: 1;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--line);
+    }
+
+    .quiz-progress i.done {
+      background: var(--rose);
+    }
+
+    .quiz-q {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      margin-bottom: 22px;
+    }
+
+    .quiz-options {
+      display: grid;
+      gap: 12px;
+    }
+
+    .quiz-options button {
+      text-align: left;
+      padding: 16px 18px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--font-body);
+      font-size: 1rem;
+      cursor: pointer;
+      transition: border-color .15s ease, transform .1s ease;
+    }
+
+    .quiz-options button:hover {
+      border-color: var(--rose);
+    }
+
+    .quiz-options button:active {
+      transform: scale(0.99);
+    }
+
+    .quiz-options button.picked {
+      border-color: var(--rose);
+      background: var(--bg-soft);
+    }
+
+    .quiz-result {
+      display: none;
+    }
+
+    .quiz-result.show {
+      display: block;
+    }
+
+    .quiz-result .score {
+      font-family: var(--font-display);
+      font-size: 3rem;
+      color: var(--rose);
+    }
+
+    .btn {
+      appearance: none;
+      border: none;
+      cursor: pointer;
+      font-family: var(--font-body);
+      font-weight: 700;
+      padding: 14px 28px;
+      border-radius: 999px;
+      background: var(--rose);
+      color: #fff8f6;
+      font-size: 1rem;
+      box-shadow: var(--shadow);
+      transition: transform .12s ease, background .15s ease;
+    }
+
+    .btn:hover {
+      background: var(--rose-deep);
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn.ghost {
+      background: transparent;
+      color: var(--rose);
+      border: 1px solid var(--rose);
+      box-shadow: none;
+    }
+
+    /* memory game */
+    .game-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 20px;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .game-stats {
+      display: flex;
+      gap: 22px;
+      font-size: 0.95rem;
+      color: var(--ink-soft);
+    }
+
+    .game-stats b {
+      color: var(--ink);
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    @media (max-width:480px) {
+      .board {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .tile {
+      aspect-ratio: 1;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.7rem;
+      cursor: pointer;
+      user-select: none;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform .35s ease, border-color .2s;
+    }
+
+    .tile .face-back {
+      font-family: var(--font-display);
+      color: var(--rose);
+      font-size: 1.3rem;
+    }
+
+    .tile .face-front {
+      display: none;
+    }
+
+    .tile.flipped .face-back {
+      display: none;
+    }
+
+    .tile.flipped .face-front {
+      display: block;
+    }
+
+    .tile.matched {
+      border-color: var(--rose);
+      background: var(--bg-soft);
+      opacity: 0.75;
+      cursor: default;
+    }
+
+    .game-win {
+      text-align: center;
+      margin-top: 22px;
+      display: none;
+    }
+
+    .game-win.show {
+      display: block;
+    }
+
+    /* college meet-cute mini scene */
+    .vn-stage {
+      position: relative;
+      height: 300px;
+      border-radius: 16px;
+      overflow: hidden;
+      background: linear-gradient(180deg, #f6dfd6 0%, #f0c9c2 55%, #e0a99f 100%);
+    }
+
+    :root[data-theme="dark"] .vn-stage {
+      background: linear-gradient(180deg, #3a1d2c 0%, #2d1420 55%, #200f18 100%);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) .vn-stage {
+        background: linear-gradient(180deg, #3a1d2c 0%, #2d1420 55%, #200f18 100%);
+      }
+    }
+
+    .vn-room {
+      position: absolute;
+      inset: 0;
+    }
+
+    .vn-board {
+      position: absolute;
+      top: 22px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 150px;
+      height: 64px;
+      background: #2f4a3d;
+      border-radius: 6px;
+      border: 4px solid #6b4a33;
+    }
+
+    .vn-window {
+      position: absolute;
+      top: 18px;
+      right: 8%;
+      width: 60px;
+      height: 76px;
+      background: rgba(255, 255, 255, 0.35);
+      border-radius: 6px;
+      border: 3px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .vn-desk {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 26px;
+      background: rgba(107, 58, 34, 0.35);
+    }
+
+    .vn-characters {
+      position: absolute;
+      bottom: 26px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      gap: 26px;
+    }
+
+    .chibi {
+      width: 92px;
+      transition: opacity .25s ease, transform .25s ease;
+      opacity: 0.55;
+      transform: translateY(0) scale(0.96);
+    }
+
+    .chibi svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      animation: chibiBob 2.4s ease-in-out infinite;
+    }
+
+    .chibi-boy svg {
+      animation-delay: 0s;
+    }
+
+    .chibi-girl svg {
+      animation-delay: .3s;
+    }
+
+    .chibi.active {
+      opacity: 1;
+      transform: translateY(-4px) scale(1.04);
+    }
+
+    @keyframes chibiBob {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-5px);
+      }
+    }
+
+    .vn-choc {
+      position: absolute;
+      left: 50%;
+      bottom: 64px;
+      width: 78px;
+      transform: translateX(-50%) scale(0);
+      transition: transform .5s cubic-bezier(.2, .9, .25, 1.4);
+      opacity: 0;
+    }
+
+    .vn-choc.show {
+      transform: translateX(-50%) scale(1);
+      opacity: 1;
+    }
+
+    .vn-dialogue {
+      margin-top: 20px;
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 20px 22px;
+    }
+
+    .vn-speaker {
+      font-family: var(--font-display);
+      font-style: italic;
+      color: var(--rose);
+      margin-bottom: 6px;
+      font-size: 1.05rem;
+    }
+
+    .vn-text {
+      min-height: 3.2em;
+      margin-bottom: 14px;
+      color: var(--ink);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .chibi svg {
+        animation: none;
+      }
+    }
+
+    /* serious questions */
+    .qbox {
+      position: relative;
+      min-height: 260px;
+      border: 1px dashed var(--line);
+      border-radius: 16px;
+      background: var(--bg);
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 22px;
+      overflow: hidden;
+      padding: 24px;
+    }
+
+    .qbox .caption {
+      font-family: var(--font-display);
+      font-style: italic;
+      color: var(--rose);
+      font-size: 1.05rem;
+      min-height: 1.4em;
+      text-align: center;
+    }
+
+    .qbox .btn-row {
+      display: flex;
+      gap: 16px;
+      width: 100%;
+      justify-content: center;
+      min-height: 56px;
+    }
+
+    .qbox [data-no] {
+      position: absolute;
+      transition: left .18s ease, top .18s ease, transform .18s ease;
+    }
+
+    .no-ghost {
+      position: absolute;
+      pointer-events: none;
+      padding: 14px 28px;
+      border-radius: 999px;
+      border: 1px solid var(--rose);
+      color: var(--rose);
+      font-family: var(--font-body);
+      font-weight: 700;
+      font-size: 1rem;
+      opacity: 0.6;
+      animation: ghostFade .9s ease forwards;
+    }
+
+    @keyframes ghostFade {
+      0% {
+        opacity: 0.6;
+        transform: scale(1);
+      }
+
+      100% {
+        opacity: 0;
+        transform: scale(0.85);
+      }
+    }
+
+    .qbox .attempts {
+      font-size: 0.85rem;
+      color: var(--ink-soft);
+    }
+
+    .serious-result {
+      display: none;
+      text-align: center;
+      margin-top: 18px;
+    }
+
+    .serious-result.show {
+      display: block;
+    }
+
+    .serious-result .big {
+      font-family: var(--font-display);
+      font-size: 1.7rem;
+      color: var(--rose);
+      margin-bottom: 6px;
+    }
+
+    /* campus scene */
+    .scene-wrap {
+      position: relative;
+      border-radius: 18px;
+      overflow: hidden;
+      height: 240px;
+      perspective: 900px;
+      box-shadow: var(--shadow);
+    }
+
+    .scene-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .scene-chars {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 26px;
+      padding-bottom: 4px;
+      transform-style: preserve-3d;
+      transition: transform .12s ease-out;
+      transform: rotateX(0deg) rotateY(0deg);
+    }
+
+    .scene-game {
+      margin-top: 22px;
+    }
+
+    .scene-prompt {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      color: var(--ink);
+      margin-bottom: 16px;
+    }
+
+    .scene-options {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .scene-options button {
+      flex: 1 1 150px;
+    }
+
+    .scene-result {
+      margin-top: 18px;
+      font-size: 1rem;
+      color: var(--ink-soft);
+      min-height: 1.4em;
+    }
+
+    .scene-result.show {
+      color: var(--ink);
+    }
+
+    .scene-result .continue-btn {
+      margin-top: 14px;
+    }
+
+    /* anime chocolate box */
+    .choco-card {
+      text-align: center;
+    }
+
+    .choco-box {
+      background: none;
+      border: none;
+      cursor: pointer;
+      width: 180px;
+      max-width: 70%;
+      padding: 0;
+    }
+
+    .choco-box svg {
+      width: 100%;
+      height: auto;
+      filter: drop-shadow(0 14px 18px rgba(140, 15, 55, 0.28));
+    }
+
+    .choco-lid {
+      transform-box: fill-box;
+      transform-origin: 70px 54px;
+      transition: transform .45s cubic-bezier(.2, .9, .25, 1.3);
+    }
+
+    .choco-heart {
+      transform-box: fill-box;
+      transform-origin: 70px 96px;
+      transform: scale(0);
+      transition: transform .4s cubic-bezier(.3, 1.4, .4, 1) .15s;
+    }
+
+    .choco-box.open .choco-lid {
+      transform: rotate(-58deg) translate(-10px, -18px);
+    }
+
+    .choco-box.open .choco-heart {
+      transform: scale(1);
+    }
+
+    .choco-msg {
+      margin-top: 18px;
+      font-family: var(--font-display);
+      font-style: italic;
+      color: var(--rose);
+      font-size: 1.15rem;
+      min-height: 1.6em;
+    }
+
+    /* love letter */
+    .letter-wrap {
+      text-align: center;
+    }
+
+    .letter {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 40px;
+      text-align: left;
+      box-shadow: var(--shadow);
+      margin-top: 26px;
+      display: none;
+      white-space: pre-wrap;
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      line-height: 1.8;
+      color: var(--ink);
+    }
+
+    .letter.show {
+      display: block;
+    }
+
+    .letter .cursor {
+      display: inline-block;
+      width: 2px;
+      background: var(--rose);
+      animation: blink 1s steps(1) infinite;
+    }
+
+    @keyframes blink {
+      50% {
+        opacity: 0;
+      }
+    }
+
+    /* closing */
+    .closing {
+      text-align: center;
+      padding-bottom: 140px;
+    }
+
+    .closing h2 {
+      font-size: clamp(2.2rem, 6vw, 3.4rem);
+    }
+
+    .sign {
+      margin-top: 30px;
+      font-family: var(--font-display);
+      font-style: italic;
+      color: var(--ink-soft);
+    }
+
+    canvas#confetti {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 50;
+    }
+
+    /* birthday intro overlay */
+    .intro-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: radial-gradient(circle at 50% 30%, #45122c 0%, #1c0714 68%, #12040d 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 1;
+      transition: opacity .6s ease;
+    }
+
+    .intro-overlay.hide {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    #introCanvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .intro-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 24px;
+      max-width: 560px;
+    }
+
+    .intro-sparkles {
+      font-size: 1.6rem;
+      margin-bottom: 10px;
+      letter-spacing: 6px;
+      animation: sparkleFade 2.2s ease-in-out infinite;
+    }
+
+    @keyframes sparkleFade {
+
+      0%,
+      100% {
+        opacity: 0.5;
+      }
+
+      50% {
+        opacity: 1;
+      }
+    }
+
+    .intro-eyebrow {
+      font-family: var(--font-body);
+      text-transform: none;
+      color: #ffc9d6;
+      font-size: 0.95rem;
+      margin-bottom: 8px;
+      opacity: 0.85;
+    }
+
+    .intro-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.6rem, 9vw, 5rem);
+      line-height: 1.02;
+      color: #fff2f5;
+      margin: 0 0 22px;
+      animation: introPop .9s cubic-bezier(.2, .9, .25, 1.2) both, introGlow 2.6s ease-in-out infinite 1s;
+    }
+
+    .intro-title em {
+      font-style: italic;
+      color: #ff9db4;
+    }
+
+    @keyframes introPop {
+      0% {
+        opacity: 0;
+        transform: scale(0.6) translateY(20px);
+      }
+
+      100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    @keyframes introGlow {
+
+      0%,
+      100% {
+        text-shadow: 0 0 18px rgba(255, 157, 180, 0.25);
+      }
+
+      50% {
+        text-shadow: 0 0 34px rgba(255, 157, 180, 0.55);
+      }
+    }
+
+    .intro-emojis {
+      display: flex;
+      justify-content: center;
+      gap: 22px;
+      font-size: 2rem;
+      margin-bottom: 30px;
+    }
+
+    .bob {
+      display: inline-block;
+      animation: bobUpDown 1.8s ease-in-out infinite;
+    }
+
+    .b1 {
+      animation-delay: 0s;
+    }
+
+    .b2 {
+      animation-delay: .2s;
+    }
+
+    .b3 {
+      animation-delay: .4s;
+    }
+
+    .b4 {
+      animation-delay: .6s;
+    }
+
+    @keyframes bobUpDown {
+
+      0%,
+      100% {
+        transform: translateY(0) rotate(-4deg);
+      }
+
+      50% {
+        transform: translateY(-14px) rotate(4deg);
+      }
+    }
+
+    .intro-skip {
+      font-size: 0.95rem;
+      padding: 13px 30px;
+    }
+
+    /* flying pig */
+    .flying-pig {
+      position: fixed;
+      left: -140px;
+      width: 110px;
+      z-index: 60;
+      pointer-events: none;
+      animation-name: pigFly;
+      animation-timing-function: linear;
+      animation-fill-mode: forwards;
+    }
+
+    .flying-pig svg {
+      display: block;
+      filter: drop-shadow(0 8px 14px rgba(140, 15, 55, 0.25));
+    }
+
+    @keyframes pigFly {
+      0% {
+        transform: translate(0, 0) rotate(-6deg) scale(0.9);
+      }
+
+      50% {
+        transform: translate(60vw, -12vh) rotate(4deg) scale(1.05);
+      }
+
+      100% {
+        transform: translate(calc(100vw + 200px), 6vh) rotate(-4deg) scale(0.95);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .flying-pig {
+        animation: none;
+        display: none;
+      }
+    }
+
+    .scroll-pop {
+      position: fixed;
+      bottom: -8vh;
+      z-index: 40;
+      pointer-events: none;
+      animation: rise linear forwards;
+      opacity: 0.95;
+    }
+
+    ::selection {
+      background: var(--blush);
+      color: var(--ink);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- BIRTHDAY FIREWORKS INTRO OVERLAY -->
+  <div id="introOverlay" class="intro-overlay">
+    <canvas id="introCanvas"></canvas>
+    <div class="intro-content">
+      <div class="intro-sparkles" aria-hidden="true">
+        <span>✨</span><span>🎉</span><span>💖</span><span>✨</span><span>🎊</span>
+      </div>
+      <div class="intro-eyebrow">it's her birthday</div>
+      <h1 class="intro-title">Happy Birthday<br><em>Kowsalya</em></h1>
+      <div class="intro-emojis" aria-hidden="true">
+        <span class="bob b1">🐷</span><span class="bob b2">🎂</span><span class="bob b3">🎈</span><span
+          class="bob b4">❤️</span>
+      </div>
+      <button class="btn intro-skip" id="introSkip" type="button">Begin the celebration ✨</button>
+    </div>
+  </div>
+
+  <div class="hearts" id="hearts" aria-hidden="true"></div>
+  <canvas id="confetti" aria-hidden="true"></canvas>
+
+  <!-- ============================================================
+     SECTION 1: 3D CINEMATIC TAJ MAHAL SCROLL EXPERIENCE (STARTING PAGE)
+============================================================ -->
+  <div id="taj-experience">
+    <div class="taj-viewport" id="taj-viewport">
+      <canvas id="taj-canvas"></canvas>
+
+      <div class="taj-ui">
+
+        <!-- Letterbox Bars (anime film style) -->
+        <div class="taj-letterbox-top"></div>
+        <div class="taj-letterbox-bottom"></div>
+
+        <!-- Top HUD -->
+        <div class="taj-topbar">
+          <div class="taj-brand">
+            <span class="taj-brand-title">Taj Mahal</span>
+            <span class="taj-brand-sub">The Monument of Eternal Love</span>
+          </div>
+          <button class="btn-hud" id="taj-audio-btn" type="button" aria-label="Toggle Sound">
+            <span id="taj-audio-icon">🔇</span>
+            <span id="taj-audio-label">Sound</span>
+          </button>
+        </div>
+
+        <!-- Side Chapter Dot Progress -->
+        <div class="taj-chapter-dots" id="taj-dots">
+          <div class="taj-chapter-dot active" data-ch="0"><span class="taj-chapter-dot-label">Exterior</span></div>
+          <div class="taj-chapter-dot" data-ch="1"><span class="taj-chapter-dot-label">Approach</span></div>
+          <div class="taj-chapter-dot" data-ch="2"><span class="taj-chapter-dot-label">Portal</span></div>
+          <div class="taj-chapter-dot" data-ch="3"><span class="taj-chapter-dot-label">Sanctum</span></div>
+          <div class="taj-chapter-dot" data-ch="4"><span class="taj-chapter-dot-label">Forever</span></div>
+        </div>
+
+        <!-- Bottom Cinematic Chapter Subtitle Bar -->
+        <div class="taj-cinematic-bar">
+          <div class="taj-chapter-display" id="taj-chapter-display">
+            <span class="taj-chapter-num" id="taj-ch-num">I &middot; Exterior</span>
+            <div class="taj-chapter-title" id="taj-ch-title">A Monument to Eternal Love</div>
+            <div class="taj-chapter-desc" id="taj-ch-desc">Shimmering white Makrana marble, glowing against the twilight
+              sky. Scroll to journey inward.</div>
+          </div>
+          <!-- Continue & Explore buttons at the climax -->
+          <div
+            style="display:flex;flex-direction:column;align-items:center;gap:8px;position:relative;z-index:22;padding-bottom:68px;">
+            <button class="taj-continue-btn" id="btn-enter-bday" type="button">Continue to Kowsy's Birthday 💖</button>
+            <button class="taj-explore-btn" id="btn-explore-taj" type="button">✦ Explore the Interior</button>
+          </div>
+        </div>
+
+        <!-- Scroll Indicator -->
+        <div class="taj-scroll-indicator" id="taj-scroll-ind">
+          <div class="taj-scroll-chevrons">
+            <span></span><span></span><span></span>
+          </div>
+          <span>Scroll</span>
+        </div>
+
+        <div id="taj-orbit-hint">
+          <span>✨ Free Look &middot; Drag to explore &middot; Pinch to zoom</span>
+          <button id="taj-exit-orbit" type="button"
+            style="margin-left:12px;background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.3);border-radius:999px;color:#fff;padding:3px 12px;cursor:pointer;font-family:inherit;font-size:0.75rem;">Done</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+     SECTION 2: ORIGINAL BIRTHDAY CELEBRATION
+============================================================ -->
+
+  <!-- HERO -->
+  <section class="hero" id="hero-section">
+    <div class="eyebrow">a little something for</div>
+    <h1>Happy Birthday,<br><em>Kowsy</em></h1>
+    <p class="sub">Four years in, and you're still my favourite person to love. Scroll down &mdash;</p>
+    <div class="years-badge">
+      <span class="num">4</span>
+      <span class="lbl">years of loving you, and counting</span>
+    </div>
+    <div class="scroll-cue"><span class="line"></span>keep going</div>
+  </section>
+
+  <!-- SINCE 23.09.2001 -->
+  <section id="since">
+    <div class="eyebrow">23 &middot; 09 &middot; 2001</div>
+    <h2>The exact math of you</h2>
+    <p>The world got noticeably better on this date. Here's the running total, updating live.</p>
+    <div class="card">
+      <div class="stat-grid" id="ageStats">
+        <div class="stat"><span class="stat-num" id="statYears">0</span><span class="stat-lbl">years</span></div>
+        <div class="stat"><span class="stat-num" id="statMonths">0</span><span class="stat-lbl">months</span></div>
+        <div class="stat"><span class="stat-num" id="statDays">0</span><span class="stat-lbl">days</span></div>
+      </div>
+      <div class="stat-sub" id="ageSub">&nbsp;</div>
+      <div class="divider"></div>
+      <div class="countdown-head">Next birthday in</div>
+      <div class="stat-grid countdown-grid" id="countdownStats">
+        <div class="stat"><span class="stat-num" id="cdDays">00</span><span class="stat-lbl">days</span></div>
+        <div class="stat"><span class="stat-num" id="cdHours">00</span><span class="stat-lbl">hrs</span></div>
+        <div class="stat"><span class="stat-num" id="cdMins">00</span><span class="stat-lbl">min</span></div>
+        <div class="stat"><span class="stat-num" id="cdSecs">00</span><span class="stat-lbl">sec</span></div>
+      </div>
+      <p class="zodiac-line">Libra, born right at the edge of Virgo season &mdash; explains the charm and the
+        stubbornness in equal parts.</p>
+    </div>
+  </section>
+
+  <!-- TIMELINE -->
+  <section id="timeline">
+    <div class="eyebrow">four years, in moments</div>
+    <h2>The story so far</h2>
+    <div class="timeline">
+      <div class="item">
+        <div class="mark"></div>
+        <div>
+          <h3>Year one</h3>
+          <p>The year of finding out you were the person I'd choose again and again &mdash; even on the days we were
+            both a mess.</p>
+        </div>
+      </div>
+      <div class="item">
+        <div class="mark"></div>
+        <div>
+          <h3>Year two</h3>
+          <p>The year we got comfortable. Inside jokes nobody else understood, and a hundred ordinary evenings that
+            somehow still felt lucky.</p>
+        </div>
+      </div>
+      <div class="item">
+        <div class="mark"></div>
+        <div>
+          <h3>Year three</h3>
+          <p>The year we got through the hard stretch and came out the other side closer than before. Proof this was
+            never going to be easy come, easy go.</p>
+        </div>
+      </div>
+      <div class="item">
+        <div class="mark"></div>
+        <div>
+          <h3>Year four</h3>
+          <p>This year. Still choosing you, still laughing at your terrible jokes, still counting down to today so I
+            could make you this.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOVE QUIZ -->
+  <section id="quiz">
+    <div class="eyebrow">how well do you know us?</div>
+    <h2>The Us Quiz</h2>
+    <p>Five questions. No wrong answers &mdash; just an excuse to relive us.</p>
+    <div class="card">
+      <div class="quiz-progress" id="quizProgress"></div>
+      <div id="quizBody"></div>
+    </div>
+  </section>
+
+  <!-- MEMORY GAME -->
+  <section id="game">
+    <div class="eyebrow">a little game</div>
+    <h2>Match the hearts</h2>
+    <p>Flip two tiles at a time and find every pair. Beat it in as few moves as you can.</p>
+    <div class="card">
+      <div class="game-head">
+        <div class="game-stats">
+          <div>Moves<br><b id="moveCount">0</b></div>
+          <div>Matched<br><b id="matchCount">0 / 8</b></div>
+        </div>
+        <button class="btn ghost" id="resetGame" type="button">Restart</button>
+      </div>
+      <div class="board" id="board"></div>
+      <div class="game-win" id="gameWin">
+        <p><strong>You found every pair.</strong> Fitting &mdash; you're pretty good at finding me too.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- COLLEGE MEET-CUTE MINI SCENE -->
+  <section id="collegeStory">
+    <div class="eyebrow">a little play, just for you</div>
+    <h2>The Day We Met in Class</h2>
+    <p>Click through it like the old visual novels. Stick around &mdash; there's chocolate at the end.</p>
+    <div class="card vn-card">
+      <div class="vn-stage" id="vnStage">
+        <div class="vn-room">
+          <div class="vn-board"></div>
+          <div class="vn-window"></div>
+          <div class="vn-desk"></div>
+        </div>
+        <div class="vn-characters">
+          <div class="chibi chibi-boy" id="chibiBoy">
+            <svg viewBox="0 0 90 150" xmlns="http://www.w3.org/2000/svg">
+              <ellipse cx="45" cy="138" rx="26" ry="7" fill="#000" opacity="0.08" />
+              <rect x="24" y="82" width="42" height="52" rx="16" fill="#2b3a67" />
+              <rect x="24" y="82" width="42" height="14" rx="7" fill="#f4f1ea" />
+              <rect x="38" y="82" width="14" height="16" fill="#c9184a" />
+              <circle cx="45" cy="46" r="27" fill="#ffd9b3" />
+              <path d="M18 40 Q20 8 45 8 Q72 8 70 42 Q60 26 45 30 Q30 26 18 40Z" fill="#2b1a12" />
+              <circle cx="35" cy="48" r="2.6" fill="#2b0f18" />
+              <circle cx="55" cy="48" r="2.6" fill="#2b0f18" />
+              <path d="M37 58 Q45 63 53 58" stroke="#2b0f18" stroke-width="2" fill="none" stroke-linecap="round" />
+              <ellipse cx="30" cy="54" rx="4" ry="2.6" fill="#ff9db4" opacity="0.5" />
+              <ellipse cx="60" cy="54" rx="4" ry="2.6" fill="#ff9db4" opacity="0.5" />
+            </svg>
+          </div>
+          <div class="chibi chibi-girl" id="chibiGirl">
+            <svg viewBox="0 0 90 150" xmlns="http://www.w3.org/2000/svg">
+              <ellipse cx="45" cy="138" rx="26" ry="7" fill="#000" opacity="0.08" />
+              <path d="M24 96 L20 134 Q45 142 70 134 L66 96Z" fill="#c9184a" />
+              <rect x="24" y="82" width="42" height="16" rx="8" fill="#f4f1ea" />
+              <rect x="38" y="82" width="14" height="16" fill="#8c0f37" />
+              <circle cx="45" cy="46" r="27" fill="#ffe0c2" />
+              <path d="M16 44 Q14 6 45 6 Q76 6 74 44 Q74 70 68 78 Q70 50 45 54 Q20 50 22 78 Q16 70 16 44Z"
+                fill="#3b1d12" />
+              <path d="M18 44 Q10 70 16 92" stroke="#3b1d12" stroke-width="10" fill="none" stroke-linecap="round" />
+              <path d="M72 44 Q80 70 74 92" stroke="#3b1d12" stroke-width="10" fill="none" stroke-linecap="round" />
+              <circle cx="35" cy="48" r="2.6" fill="#2b0f18" />
+              <circle cx="55" cy="48" r="2.6" fill="#2b0f18" />
+              <path d="M38 59 Q45 64 52 59" stroke="#2b0f18" stroke-width="2" fill="none" stroke-linecap="round" />
+              <ellipse cx="31" cy="55" rx="4.5" ry="3" fill="#ff7ba0" opacity="0.55" />
+              <ellipse cx="59" cy="55" rx="4.5" ry="3" fill="#ff7ba0" opacity="0.55" />
+              <path d="M31 24 l4 8 l-8 -2Z" fill="#ffd166" />
+            </svg>
+          </div>
+        </div>
+        <div class="vn-choc" id="vnChoc" aria-hidden="true">
+          <svg viewBox="0 0 100 90" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="26" width="80" height="54" rx="8" fill="#6b3a22" />
+            <rect x="10" y="26" width="80" height="54" rx="8" fill="none" stroke="#4a2716" stroke-width="2" />
+            <rect x="10" y="10" width="80" height="20" rx="6" fill="#c9184a" />
+            <path d="M50 14 c-6 -10 -20 -6 -20 3 c0 8 20 18 20 18 s20 -10 20 -18 c0 -9 -14 -13 -20 -3Z"
+              fill="#ffb4c2" />
+            <circle cx="30" cy="53" r="6" fill="#8a4a2a" />
+            <circle cx="50" cy="53" r="6" fill="#8a4a2a" />
+            <circle cx="70" cy="53" r="6" fill="#8a4a2a" />
+          </svg>
+        </div>
+      </div>
+      <div class="vn-dialogue">
+        <div class="vn-speaker" id="vnSpeaker">Arun</div>
+        <div class="vn-text" id="vnText"></div>
+        <button class="btn" id="vnNext" type="button">Next</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- A FEW VERY SERIOUS QUESTIONS -->
+  <section id="serious">
+    <div class="eyebrow">a few very serious questions</div>
+    <h2>Answer honestly. Well, sort of.</h2>
+    <p>Three questions. Fair warning: on every single one, only Yes actually works &mdash; and each No button has its
+      own way of making that very clear.</p>
+
+    <div class="card">
+      <h3 style="margin-bottom:16px;">Will you stay with me till the very end?</h3>
+      <div class="qbox" data-qid="1" data-type="dodge">
+        <div class="caption">&nbsp;</div>
+        <div class="btn-row">
+          <button class="btn" data-yes type="button">Yes, till the end</button>
+          <button class="btn ghost" data-no type="button">No</button>
+        </div>
+        <div class="attempts"></div>
+      </div>
+      <div class="serious-result">
+        <div class="big">Good. That's the deal, then.</div>
+        <p data-result-text>Till the very end, and whatever comes after that too.</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:20px;">
+      <h3 style="margin-bottom:16px;">Should I admit I'm the better-looking one between us?</h3>
+      <div class="qbox" data-qid="2" data-type="shrink">
+        <div class="caption">&nbsp;</div>
+        <div class="btn-row">
+          <button class="btn" data-yes type="button">Yes, go ahead</button>
+          <button class="btn ghost" data-no type="button">No</button>
+        </div>
+        <div class="attempts"></div>
+      </div>
+      <div class="serious-result">
+        <div class="big">Wise decision.</div>
+        <p data-result-text>Noted, agreed, and never getting brought up again. Probably.</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:20px;">
+      <h3 style="margin-bottom:16px;">You're basically my little piglet, aren't you?</h3>
+      <div class="qbox" data-qid="3" data-type="multiply">
+        <div class="caption">&nbsp;</div>
+        <div class="btn-row">
+          <button class="btn" data-yes type="button">Yes, I am</button>
+          <button class="btn ghost" data-no type="button">No</button>
+        </div>
+        <div class="attempts"></div>
+      </div>
+      <div class="serious-result">
+        <div class="big">Confirmed, officially.</div>
+        <p data-result-text>My panni kutty, forever and on record.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CAMPUS LOVE STORY: MINI GAME -->
+  <section id="campus">
+    <div class="eyebrow">a little side story</div>
+    <h2>Campus Love, Chapter One</h2>
+    <p>Move your cursor over the scene to see it shift. Then help decide what happens next.</p>
+    <div class="card">
+      <div class="scene-wrap" id="sceneWrap">
+        <svg class="scene-bg" viewBox="0 0 400 220" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="0" y="0" width="400" height="220" fill="url(#skyGrad)" />
+          <defs>
+            <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#3a1330" />
+              <stop offset="100%" stop-color="#7a2c4a" />
+            </linearGradient>
+          </defs>
+          <rect x="24" y="26" width="140" height="72" rx="6" fill="#2c4235" stroke="#e9e2d6" stroke-width="4" />
+          <text x="94" y="68" font-family="Fraunces, serif" font-style="italic" font-size="18" fill="#f3ead9"
+            text-anchor="middle">Semester 4 &#10084;</text>
+          <rect x="0" y="150" width="400" height="70" fill="#5a2036" />
+          <rect x="230" y="120" width="70" height="46" rx="4" fill="#e7c078" opacity="0.85" />
+          <rect x="310" y="120" width="70" height="46" rx="4" fill="#e7c078" opacity="0.7" />
+        </svg>
+        <div class="scene-chars" id="sceneChars">
+          <div class="chibi chibi-boy" id="sceneBoy" style="transform: translateZ(34px);">
+            <svg viewBox="0 0 120 150" xmlns="http://www.w3.org/2000/svg">
+              <ellipse cx="60" cy="140" rx="46" ry="14" fill="#000" opacity="0.18" />
+              <path d="M18 132 Q60 96 102 132 L102 150 L18 150 Z" fill="#26436b" />
+              <path d="M46 120 L60 138 L74 120 L64 118 L60 126 L56 118 Z" fill="#e7c078" />
+              <circle cx="60" cy="70" r="40" fill="#ffdcb8" />
+              <path d="M20 62 Q24 18 60 18 Q96 18 100 62 Q92 40 60 40 Q28 40 20 62 Z" fill="#2c1b12" />
+              <circle cx="44" cy="72" r="4.5" fill="#241305" />
+              <circle cx="76" cy="72" r="4.5" fill="#241305" />
+              <ellipse cx="38" cy="84" rx="7" ry="4" fill="#ff9fb0" opacity="0.6" />
+              <ellipse cx="82" cy="84" rx="7" ry="4" fill="#ff9fb0" opacity="0.6" />
+              <path d="M48 92 Q60 100 72 92" stroke="#7a4326" stroke-width="3" fill="none" stroke-linecap="round" />
+            </svg>
+          </div>
+          <div class="chibi chibi-girl" id="sceneGirl" style="transform: translateZ(12px);">
+            <svg viewBox="0 0 120 150" xmlns="http://www.w3.org/2000/svg">
+              <ellipse cx="60" cy="140" rx="46" ry="14" fill="#000" opacity="0.18" />
+              <path d="M18 132 Q60 100 102 132 L102 150 L18 150 Z" fill="#7a1f3d" />
+              <path d="M30 120 L44 148 L36 148 L26 124 Z" fill="#e2b4c1" />
+              <path d="M90 120 L76 148 L84 148 L94 124 Z" fill="#e2b4c1" />
+              <circle cx="60" cy="70" r="40" fill="#ffdcb8" />
+              <path d="M18 66 Q16 24 60 20 Q104 24 102 66 Q94 44 60 44 Q26 44 18 66 Z" fill="#301418" />
+              <ellipse cx="16" cy="90" rx="12" ry="20" fill="#301418" />
+              <ellipse cx="104" cy="90" rx="12" ry="20" fill="#301418" />
+              <circle cx="44" cy="72" r="4.5" fill="#241305" />
+              <circle cx="76" cy="72" r="4.5" fill="#241305" />
+              <circle cx="45.5" cy="70.5" r="1.3" fill="#fff" />
+              <circle cx="77.5" cy="70.5" r="1.3" fill="#fff" />
+              <ellipse cx="38" cy="84" rx="7" ry="4.5" fill="#ff8fa3" opacity="0.75" />
+              <ellipse cx="82" cy="84" rx="7" ry="4.5" fill="#ff8fa3" opacity="0.75" />
+              <path d="M48 92 Q60 102 72 92" stroke="#7a2244" stroke-width="3" fill="none" stroke-linecap="round" />
+              <path d="M52 34 L60 24 L68 34 Z" fill="#c9184a" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="scene-game" id="sceneGame">
+        <p class="scene-prompt" id="scenePrompt">It's break time in class. What should Arun do?</p>
+        <div class="scene-options" id="sceneOptions">
+          <button class="btn ghost" data-choice="choco" type="button">Slide her a chocolate</button>
+          <button class="btn ghost" data-choice="note" type="button">Pass a secret note</button>
+          <button class="btn ghost" data-choice="stare" type="button">Just stare and panic</button>
+        </div>
+        <div class="scene-result" id="sceneResult"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ANIME CHOCOLATE BOX -->
+  <section id="choco">
+    <div class="eyebrow">one more sweet thing</div>
+    <h2>Open the chocolate box</h2>
+    <p>Go on, tap it.</p>
+    <div class="card choco-card">
+      <button class="choco-box" id="chocoBox" type="button" aria-label="Open the chocolate box">
+        <svg viewBox="0 0 140 120" xmlns="http://www.w3.org/2000/svg">
+          <rect x="10" y="46" width="120" height="64" rx="10" fill="#7a2c4a" />
+          <rect x="10" y="46" width="120" height="64" rx="10" fill="none" stroke="#e7c078" stroke-width="3" />
+          <g id="chocoLid" class="choco-lid">
+            <rect x="6" y="20" width="128" height="34" rx="10" fill="#c9184a" />
+            <path d="M70 20 C40 20 40 4 70 4 C100 4 100 20 70 20 Z" fill="#c9184a" />
+            <path d="M70 4 C74 10 74 16 70 20 C66 16 66 10 70 4 Z" fill="#e7c078" />
+          </g>
+          <g id="chocoHeart" class="choco-heart">
+            <path d="M70 78 C52 60 30 66 30 84 C30 100 70 116 70 116 C70 116 110 100 110 84 C110 66 88 60 70 78 Z"
+              fill="#ff9db4" />
+          </g>
+        </svg>
+      </button>
+      <div class="choco-msg" id="chocoMsg">&nbsp;</div>
+    </div>
+  </section>
+
+  <!-- LOVE LETTER -->
+  <section id="letter">
+    <div class="eyebrow">one more thing</div>
+    <h2 class="letter-wrap-title">Open when you're ready</h2>
+    <div class="letter-wrap">
+      <p>There's a letter in here. It only opens once you press the button.</p>
+      <button class="btn" id="openLetter" type="button">Open the letter</button>
+      <div class="letter" id="letterBox"></div>
+    </div>
+  </section>
+
+  <!-- CLOSING -->
+  <section class="closing">
+    <div class="eyebrow">last thing, promise</div>
+    <h2>Happy Birthday, Kowsy.<br>Here's to year five.</h2>
+    <p>Press the button. I mean it every time.</p>
+    <button class="btn" id="wishBtn" type="button">Happy birthday, panni kutty 🐷</button>
+    <p class="sign">&mdash; with all my love, Arun Diwagar</p>
+  </section>
+
+  <!-- ============================================================
+     3. JAVASCRIPT: COMBINED & OPTIMIZED ENGINE
+============================================================ -->
+  <script>
+    (function () {
+      "use strict";
+
+      var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      /* ---------- 3D TAJ MAHAL SCROLL ENGINE ---------- */
+      (function initTajMahal3D() {
+        var canvas = document.getElementById('taj-canvas');
+        if (!canvas) return;
+
+        var renderer = new THREE.WebGLRenderer({
+          canvas: canvas,
+          antialias: true,
+          powerPreference: 'high-performance',
+          alpha: false
+        });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.12;
+
+        var scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x0a040b);
+        scene.fog = new THREE.FogExp2(0x1a0a18, 0.0035);
+
+        var camera = new THREE.PerspectiveCamera(48, window.innerWidth / window.innerHeight, 0.1, 1200);
+
+        var controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enabled = false;
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.maxPolarAngle = Math.PI / 2 + 0.05;
+        controls.minDistance = 3;
+        controls.maxDistance = 140;
+
+        /* Procedural Textures */
+        function makeMarbleTexture() {
+          var c = document.createElement('canvas');
+          c.width = 1024; c.height = 1024;
+          var ctx = c.getContext('2d');
+          var grad = ctx.createLinearGradient(0, 0, 1024, 1024);
+          grad.addColorStop(0, '#faf4ec');
+          grad.addColorStop(0.5, '#f4ece2');
+          grad.addColorStop(1, '#eee2d5');
+          ctx.fillStyle = grad;
+          ctx.fillRect(0, 0, 1024, 1024);
+          for (var i = 0; i < 35000; i++) {
+            ctx.fillStyle = Math.random() > 0.5 ? 'rgba(255,255,255,0.06)' : 'rgba(195,170,150,0.03)';
+            ctx.fillRect(Math.random() * 1024, Math.random() * 1024, 3 + Math.random() * 8, 3 + Math.random() * 8);
+          }
+          ctx.lineWidth = 2.5;
+          for (var v = 0; v < 7; v++) {
+            ctx.strokeStyle = 'rgba(180, 150, 140, ' + (0.08 + Math.random() * 0.08) + ')';
+            ctx.beginPath();
+            var x = Math.random() * 1024, y = 0;
+            ctx.moveTo(x, y);
+            while (y < 1024) {
+              y += 8 + Math.random() * 14;
+              x += (Math.random() - 0.48) * 18;
+              ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+          }
+          var tex = new THREE.CanvasTexture(c);
+          tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
+          return tex;
+        }
+
+        function makePietraTexture() {
+          var c = document.createElement('canvas');
+          c.width = 512; c.height = 512;
+          var ctx = c.getContext('2d');
+          ctx.fillStyle = '#f8f1e7';
+          ctx.fillRect(0, 0, 512, 512);
+          ctx.strokeStyle = '#c9933b'; ctx.lineWidth = 14; ctx.strokeRect(10, 10, 492, 492);
+          ctx.strokeStyle = '#8c0f37'; ctx.lineWidth = 6; ctx.strokeRect(26, 26, 460, 460);
+          for (var i = 0; i < 8; i++) {
+            var a = (i * Math.PI) / 4;
+            var cx = 256 + Math.cos(a) * 160, cy = 256 + Math.sin(a) * 160;
+            ctx.fillStyle = '#c9184a'; ctx.beginPath(); ctx.arc(cx, cy, 18, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#dfb15b'; ctx.beginPath(); ctx.arc(cx, cy, 8, 0, Math.PI * 2); ctx.fill();
+          }
+          var tex = new THREE.CanvasTexture(c);
+          tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
+          return tex;
+        }
+
+        function makeJaliTexture() {
+          var c = document.createElement('canvas');
+          c.width = 256; c.height = 256;
+          var ctx = c.getContext('2d');
+          ctx.clearRect(0, 0, 256, 256);
+          ctx.fillStyle = '#fdfaf5';
+          var s = 32;
+          for (var x = 0; x < 256; x += s) {
+            for (var y = 0; y < 256; y += s) {
+              ctx.beginPath(); ctx.arc(x + s / 2, y + s / 2, s * 0.38, 0, Math.PI * 2); ctx.fill();
+            }
+          }
+          var tex = new THREE.CanvasTexture(c);
+          tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping; tex.repeat.set(4, 4);
+          return tex;
+        }
+
+        function makeDomeTexture() {
+          var c = document.createElement('canvas');
+          c.width = 1024; c.height = 1024;
+          var ctx = c.getContext('2d');
+          var grad = ctx.createRadialGradient(512, 512, 40, 512, 512, 512);
+          grad.addColorStop(0, '#1c1b3d');
+          grad.addColorStop(0.5, '#120d24');
+          grad.addColorStop(1, '#080512');
+          ctx.fillStyle = grad;
+          ctx.fillRect(0, 0, 1024, 1024);
+          ctx.translate(512, 512);
+          for (var i = 0; i < 24; i++) {
+            ctx.rotate((Math.PI * 2) / 24);
+            ctx.fillStyle = 'rgba(223, 177, 91, 0.45)';
+            ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(-14, 460); ctx.lineTo(0, 500); ctx.lineTo(14, 460); ctx.closePath(); ctx.fill();
+            ctx.fillStyle = 'rgba(201, 24, 74, 0.35)';
+            ctx.beginPath(); ctx.arc(0, 360, 12, 0, Math.PI * 2); ctx.fill();
+          }
+          ctx.setTransform(1, 0, 0, 1, 0, 0);
+          return new THREE.CanvasTexture(c);
+        }
+
+        var marbleTex = makeMarbleTexture();
+        var pietraTex = makePietraTexture();
+        var jaliTex = makeJaliTexture();
+        var domeCeilingTex = makeDomeTexture();
+
+        /* Materials */
+        var matMarble = new THREE.MeshStandardMaterial({ map: marbleTex, roughness: 0.32, metalness: 0.08, color: 0xfffcf7 });
+        var matSandstone = new THREE.MeshStandardMaterial({ color: 0x6e2c36, roughness: 0.85, metalness: 0.02 });
+        var matGold = new THREE.MeshStandardMaterial({ color: 0xe5ba5c, roughness: 0.25, metalness: 0.88, emissive: 0x47320c, emissiveIntensity: 0.3 });
+        var matDarkBronze = new THREE.MeshStandardMaterial({ color: 0x241712, roughness: 0.45, metalness: 0.85 });
+        var matPietra = new THREE.MeshStandardMaterial({ map: pietraTex, roughness: 0.4, metalness: 0.1 });
+        var matJali = new THREE.MeshStandardMaterial({ map: jaliTex, alphaMap: jaliTex, transparent: true, side: THREE.DoubleSide, roughness: 0.3, color: 0xfffaee });
+
+        /* Lighting */
+        var hemiLight = new THREE.HemisphereLight(0xedd4c8, 0x1f1025, 0.7);
+        scene.add(hemiLight);
+
+        var sunLight = new THREE.DirectionalLight(0xffdfb3, 1.4);
+        sunLight.position.set(90, 80, 120);
+        sunLight.castShadow = true;
+        sunLight.shadow.mapSize.width = 1024; sunLight.shadow.mapSize.height = 1024;
+        sunLight.shadow.bias = -0.0004;
+        scene.add(sunLight);
+
+        var rimLight = new THREE.DirectionalLight(0x9180c4, 0.8);
+        rimLight.position.set(-60, 90, -90);
+        scene.add(rimLight);
+
+        var archLanternLight = new THREE.PointLight(0xffaa5e, 2.2, 38, 1.8);
+        archLanternLight.position.set(0, 15.5, 3.5);
+        scene.add(archLanternLight);
+
+        var sanctumLight = new THREE.PointLight(0xffb56b, 3.2, 55, 1.5);
+        sanctumLight.position.set(0, 18, -48);
+        sanctumLight.castShadow = true;
+        scene.add(sanctumLight);
+
+        var sanctumMoonbeam = new THREE.SpotLight(0xcfd9ff, 2.4, 60, Math.PI / 5, 0.45, 1.2);
+        sanctumMoonbeam.position.set(0, 36, -48);
+        sanctumMoonbeam.target.position.set(0, 0, -48);
+        scene.add(sanctumMoonbeam);
+        scene.add(sanctumMoonbeam.target);
+
+        /* Sky & Stars */
+        var skyGeo = new THREE.SphereGeometry(600, 24, 24);
+        var skyMat = new THREE.ShaderMaterial({
+          side: THREE.BackSide,
+          uniforms: { topColor: { value: new THREE.Color(0x0a030d) }, bottomColor: { value: new THREE.Color(0x381729) } },
+          vertexShader: "varying vec3 vWP; void main(){ vec4 w = modelMatrix * vec4(position, 1.0); vWP = w.xyz; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }",
+          fragmentShader: "uniform vec3 topColor; uniform vec3 bottomColor; varying vec3 vWP; void main(){ float h = normalize(vWP).y; gl_FragColor = vec4(mix(bottomColor, topColor, max(0.0, min(1.0, h*2.2 + 0.15))), 1.0); }"
+        });
+        scene.add(new THREE.Mesh(skyGeo, skyMat));
+
+        var starGeo = new THREE.BufferGeometry();
+        var starCount = 1400;
+        var starPos = new Float32Array(starCount * 3);
+        for (var s = 0; s < starCount * 3; s += 3) {
+          var u = Math.random(), v = Math.random();
+          var theta = u * 2.0 * Math.PI, phi = Math.acos(2.0 * v - 1.0);
+          var r = 520;
+          starPos[s] = r * Math.sin(phi) * Math.cos(theta);
+          starPos[s + 1] = Math.abs(r * Math.cos(phi)) + 15;
+          starPos[s + 2] = r * Math.sin(phi) * Math.sin(theta);
+        }
+        starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+        scene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 1.8, transparent: true, opacity: 0.85 })));
+
+        /* Taj Mahal Architecture */
+        var tajGroup = new THREE.Group();
+        scene.add(tajGroup);
+
+        var ground = new THREE.Mesh(new THREE.PlaneGeometry(500, 500), new THREE.MeshStandardMaterial({ color: 0x140a11, roughness: 0.95 }));
+        ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true;
+        tajGroup.add(ground);
+
+        var redPlinth = new THREE.Mesh(new THREE.BoxGeometry(160, 2.5, 160), matSandstone);
+        redPlinth.position.set(0, 1.25, 0); redPlinth.receiveShadow = true;
+        tajGroup.add(redPlinth);
+
+        var marblePlinth = new THREE.Mesh(new THREE.BoxGeometry(130, 4.5, 130), matMarble);
+        marblePlinth.position.set(0, 4.75, 0); marblePlinth.castShadow = true; marblePlinth.receiveShadow = true;
+        tajGroup.add(marblePlinth);
+
+        function createOnionDome(radius, height, segments) {
+          var pts = [];
+          pts.push(new THREE.Vector2(radius * 0.72, 0));
+          pts.push(new THREE.Vector2(radius * 0.72, height * 0.28));
+          pts.push(new THREE.Vector2(radius * 0.70, height * 0.32));
+          pts.push(new THREE.Vector2(radius * 0.88, height * 0.42));
+          pts.push(new THREE.Vector2(radius * 1.02, height * 0.58));
+          pts.push(new THREE.Vector2(radius * 0.98, height * 0.72));
+          pts.push(new THREE.Vector2(radius * 0.75, height * 0.84));
+          pts.push(new THREE.Vector2(radius * 0.42, height * 0.93));
+          pts.push(new THREE.Vector2(radius * 0.12, height * 0.98));
+          pts.push(new THREE.Vector2(0, height));
+          return new THREE.Mesh(new THREE.LatheGeometry(pts, segments), matMarble);
+        }
+
+        function createFinial(height) {
+          var fg = new THREE.Group();
+          fg.add(new THREE.Mesh(new THREE.CylinderGeometry(1.6, 0.4, 1.4, 16), matGold));
+          var b = new THREE.Mesh(new THREE.SphereGeometry(1.2, 16, 16), matGold);
+          b.position.y = 1.8; fg.add(b);
+          var rod = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.35, height - 2, 8), matGold);
+          rod.position.y = 1.8 + height / 2; fg.add(rod);
+          return fg;
+        }
+
+        var mausoleumGroup = new THREE.Group();
+        mausoleumGroup.position.set(0, 7, 0);
+        tajGroup.add(mausoleumGroup);
+
+        var bodyWidth = 64, bodyHeight = 36, bodyDepth = 64;
+        var mainBlock = new THREE.Mesh(new THREE.BoxGeometry(bodyWidth, bodyHeight, bodyDepth), matMarble);
+        mainBlock.position.set(0, bodyHeight / 2, 0); mainBlock.castShadow = true; mainBlock.receiveShadow = true;
+        mausoleumGroup.add(mainBlock);
+
+        var parapet = new THREE.Mesh(new THREE.BoxGeometry(bodyWidth + 2.5, 2.5, bodyDepth + 2.5), matMarble);
+        parapet.position.set(0, bodyHeight + 1.25, 0);
+        mausoleumGroup.add(parapet);
+
+        var drum = new THREE.Mesh(new THREE.CylinderGeometry(14.5, 14.5, 12, 32), matMarble);
+        drum.position.set(0, bodyHeight + 6, 0);
+        mausoleumGroup.add(drum);
+
+        var centralDome = createOnionDome(17.5, 34, 42);
+        centralDome.position.set(0, bodyHeight + 12, 0);
+        mausoleumGroup.add(centralDome);
+
+        var mainFinial = createFinial(13);
+        mainFinial.position.set(0, bodyHeight + 46, 0);
+        mausoleumGroup.add(mainFinial);
+
+        function createChattri() {
+          var cg = new THREE.Group();
+          var pGeo = new THREE.CylinderGeometry(0.35, 0.4, 8, 8);
+          for (var i = 0; i < 8; i++) {
+            var a = (i * Math.PI * 2) / 8;
+            var p = new THREE.Mesh(pGeo, matMarble);
+            p.position.set(Math.cos(a) * 3.4, 4, Math.sin(a) * 3.4);
+            cg.add(p);
+          }
+          var bMesh = new THREE.Mesh(new THREE.CylinderGeometry(4.2, 4.4, 1, 16), matMarble);
+          bMesh.position.y = 0.5; cg.add(bMesh);
+          var rMesh = new THREE.Mesh(new THREE.CylinderGeometry(4.4, 4.2, 0.8, 16), matMarble);
+          rMesh.position.y = 8.4; cg.add(rMesh);
+          var mDome = createOnionDome(4.2, 7.5, 20);
+          mDome.position.y = 8.8; cg.add(mDome);
+          var f = createFinial(4);
+          f.position.y = 16.3; cg.add(f);
+          return cg;
+        }
+
+        [[-22, -22], [22, -22], [-22, 22], [22, 22]].forEach(function (pos) {
+          var ch = createChattri(); ch.position.set(pos[0], bodyHeight + 1.25, pos[1]);
+          mausoleumGroup.add(ch);
+        });
+
+        function createMinaret() {
+          var mg = new THREE.Group();
+          var bMesh = new THREE.Mesh(new THREE.CylinderGeometry(4.8, 5.2, 6, 8), matMarble);
+          bMesh.position.y = 3; mg.add(bMesh);
+          var t1 = new THREE.Mesh(new THREE.CylinderGeometry(3.6, 4.2, 28, 16), matMarble);
+          t1.position.y = 20; mg.add(t1);
+          var bc1 = new THREE.Mesh(new THREE.CylinderGeometry(4.4, 3.8, 1.8, 16), matMarble);
+          bc1.position.y = 34; mg.add(bc1);
+          var t2 = new THREE.Mesh(new THREE.CylinderGeometry(3.1, 3.5, 22, 16), matMarble);
+          t2.position.y = 45; mg.add(t2);
+          var bc2 = new THREE.Mesh(new THREE.CylinderGeometry(3.8, 3.2, 1.6, 16), matMarble);
+          bc2.position.y = 57; mg.add(bc2);
+          var t3 = new THREE.Mesh(new THREE.CylinderGeometry(2.7, 3.0, 16, 16), matMarble);
+          t3.position.y = 65; mg.add(t3);
+          var topCh = createChattri(); topCh.scale.set(0.65, 0.65, 0.65); topCh.position.y = 73;
+          mg.add(topCh);
+          return mg;
+        }
+
+        [[-58, -58], [58, -58], [-58, 58], [58, 58]].forEach(function (mpos) {
+          var min = createMinaret(); min.position.set(mpos[0], 7, mpos[1]);
+          tajGroup.add(min);
+        });
+
+        /* Archway Portal */
+        var archPortalGroup = new THREE.Group();
+        archPortalGroup.position.set(0, 0, bodyDepth / 2);
+        mausoleumGroup.add(archPortalGroup);
+
+        var archFrame = new THREE.Mesh(new THREE.BoxGeometry(24, 28, 2), matPietra);
+        archFrame.position.set(0, 14, 0);
+        archPortalGroup.add(archFrame);
+
+        var archShape = new THREE.Shape();
+        archShape.moveTo(-7.5, 0); archShape.lineTo(-7.5, 14);
+        archShape.quadraticCurveTo(-6.8, 18, 0, 22);
+        archShape.quadraticCurveTo(6.8, 18, 7.5, 14);
+        archShape.lineTo(7.5, 0); archShape.closePath();
+
+        var archTunnelGeo = new THREE.ExtrudeGeometry(archShape, { steps: 2, depth: 20, bevelEnabled: true, bevelThickness: 0.8, bevelSize: 0.8 });
+        archTunnelGeo.translate(0, 0, -20);
+        archPortalGroup.add(new THREE.Mesh(archTunnelGeo, matMarble));
+
+        var lanternGroup = new THREE.Group();
+        lanternGroup.position.set(0, 15.5, -4);
+        archPortalGroup.add(lanternGroup);
+
+        var chain = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 5, 6), matDarkBronze);
+        chain.position.y = 2.5; lanternGroup.add(chain);
+        lanternGroup.add(new THREE.Mesh(new THREE.OctahedronGeometry(1.3, 0), matGold));
+        lanternGroup.add(new THREE.Mesh(new THREE.SphereGeometry(0.7, 16, 16), new THREE.MeshBasicMaterial({ color: 0xffd27d })));
+
+        /* Reflecting Pool & Cypress */
+        var poolLength = 180, poolWidth = 24;
+        var poolGroup = new THREE.Group();
+        poolGroup.position.set(0, 0.1, 140);
+        tajGroup.add(poolGroup);
+
+        var poolBorder = new THREE.Mesh(new THREE.BoxGeometry(poolWidth + 4, 0.4, poolLength + 4), matSandstone);
+        poolBorder.position.y = 0.2; poolGroup.add(poolBorder);
+
+        var waterMesh = new THREE.Mesh(new THREE.PlaneGeometry(poolWidth, poolLength, 16, 32), new THREE.MeshStandardMaterial({ color: 0x0e1b24, roughness: 0.12, metalness: 0.85, transparent: true, opacity: 0.88 }));
+        waterMesh.rotation.x = -Math.PI / 2; waterMesh.position.y = 0.35;
+        poolGroup.add(waterMesh);
+
+        function createCypress() {
+          var tg = new THREE.Group();
+          var tr = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.4, 3, 8), matDarkBronze);
+          tr.position.y = 1.5; tg.add(tr);
+          var c1 = new THREE.Mesh(new THREE.ConeGeometry(2.2, 12, 10), new THREE.MeshStandardMaterial({ color: 0x0f2918, roughness: 0.85 }));
+          c1.position.y = 7; tg.add(c1);
+          var c2 = new THREE.Mesh(new THREE.ConeGeometry(1.6, 9, 10), new THREE.MeshStandardMaterial({ color: 0x163b23, roughness: 0.85 }));
+          c2.position.y = 12; tg.add(c2);
+          return tg;
+        }
+
+        for (var pz = -poolLength / 2 + 10; pz <= poolLength / 2 - 10; pz += 24) {
+          var t1 = createCypress(); t1.position.set(-poolWidth / 2 - 5, 0, pz); poolGroup.add(t1);
+          var t2 = createCypress(); t2.position.set(poolWidth / 2 + 5, 0, pz); poolGroup.add(t2);
+          var lp = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.3, 2.5, 8), matGold);
+          lp.position.set(-poolWidth / 2 - 2, 1.25, pz); poolGroup.add(lp);
+          var lp2 = lp.clone(); lp2.position.x = poolWidth / 2 + 2; poolGroup.add(lp2);
+        }
+
+        /* Inner Sanctum & Vault */
+        var sanctumGroup = new THREE.Group();
+        sanctumGroup.position.set(0, 7, -48);
+        tajGroup.add(sanctumGroup);
+
+        var sanctumFloor = new THREE.Mesh(new THREE.CylinderGeometry(24, 24, 0.6, 8), matMarble);
+        sanctumFloor.position.y = 0.3; sanctumFloor.receiveShadow = true; sanctumGroup.add(sanctumFloor);
+
+        var sanctumWalls = new THREE.Mesh(new THREE.CylinderGeometry(24, 24, 34, 8, 1, true), new THREE.MeshStandardMaterial({ map: marbleTex, roughness: 0.4, side: THREE.BackSide }));
+        sanctumWalls.position.y = 17; sanctumGroup.add(sanctumWalls);
+
+        var innerDome = new THREE.Mesh(new THREE.SphereGeometry(24, 24, 20, 0, Math.PI * 2, 0, Math.PI / 2), new THREE.MeshStandardMaterial({ map: domeCeilingTex, roughness: 0.35, metalness: 0.3, side: THREE.BackSide, emissive: 0x1f1430, emissiveIntensity: 0.3 }));
+        innerDome.position.y = 34; innerDome.rotation.y = Math.PI / 8; sanctumGroup.add(innerDome);
+
+        for (var ji = 0; ji < 8; ji++) {
+          var ja = (ji * Math.PI * 2) / 8;
+          var jm = new THREE.Mesh(new THREE.PlaneGeometry(8, 16), matJali);
+          jm.position.set(Math.cos(ja) * 23.4, 14, Math.sin(ja) * 23.4);
+          jm.lookAt(0, 14, 0); sanctumGroup.add(jm);
+        }
+
+        var cenScreen = new THREE.Mesh(new THREE.CylinderGeometry(9, 9, 4, 8, 1, true), matJali);
+        cenScreen.position.y = 2; sanctumGroup.add(cenScreen);
+
+        var cenBase = new THREE.Mesh(new THREE.BoxGeometry(6, 1.2, 9), matPietra);
+        cenBase.position.y = 0.6; cenBase.castShadow = true; sanctumGroup.add(cenBase);
+
+        var chandelier = new THREE.Group();
+        chandelier.position.set(0, 20, 0); sanctumGroup.add(chandelier);
+        var chRod = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 14, 8), matGold);
+        chRod.position.y = 7; chandelier.add(chRod);
+        chandelier.add(new THREE.Mesh(new THREE.SphereGeometry(2.4, 16, 16), matGold));
+        chandelier.add(new THREE.Mesh(new THREE.SphereGeometry(1.6, 16, 16), new THREE.MeshBasicMaterial({ color: 0xffd999 })));
+
+        /* The Couple */
+        var coupleGroup = new THREE.Group();
+        coupleGroup.position.set(0, 1.2, 0);
+        sanctumGroup.add(coupleGroup);
+
+        var matFigHe = new THREE.MeshStandardMaterial({ color: 0xfbf8f3, roughness: 0.35, metalness: 0.15, emissive: 0x4a2c1d, emissiveIntensity: 0.25 });
+        var matFigShe = new THREE.MeshStandardMaterial({ color: 0xfff0f3, roughness: 0.32, metalness: 0.15, emissive: 0x541829, emissiveIntensity: 0.3 });
+
+        var heGroup = new THREE.Group(); heGroup.position.set(-1.1, 0, 0); coupleGroup.add(heGroup);
+        var heBody = new THREE.Mesh(new THREE.CylinderGeometry(0.65, 0.95, 4.4, 16), matFigHe); heBody.position.y = 2.2; heGroup.add(heBody);
+        var heHead = new THREE.Mesh(new THREE.SphereGeometry(0.52, 16, 16), matFigHe); heHead.position.y = 4.8; heGroup.add(heHead);
+        var heArm = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 2.2, 8), matFigHe);
+        heArm.position.set(0.7, 2.7, 0.3); heArm.rotation.z = -Math.PI / 7; heArm.rotation.x = 0.2; heGroup.add(heArm);
+
+        var sheGroup = new THREE.Group(); sheGroup.position.set(1.1, 0, 0); coupleGroup.add(sheGroup);
+        var sheBody = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 1.25, 4.0, 16), matFigShe); sheBody.position.y = 2.0; sheGroup.add(sheBody);
+        var sheHead = new THREE.Mesh(new THREE.SphereGeometry(0.48, 16, 16), matFigShe); sheHead.position.y = 4.4; sheGroup.add(sheHead);
+        var dupatta = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 1.4, 3.8, 16, 1, true, 0, Math.PI), new THREE.MeshStandardMaterial({ color: 0xff8fa3, roughness: 0.3, side: THREE.DoubleSide, transparent: true, opacity: 0.85 }));
+        dupatta.position.set(0, 2.1, -0.3); sheGroup.add(dupatta);
+        var sheArm = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.2, 2.0, 8), matFigShe);
+        sheArm.position.set(-0.65, 2.5, 0.3); sheArm.rotation.z = Math.PI / 7; sheArm.rotation.x = 0.2; sheGroup.add(sheArm);
+
+        var handGlow = new THREE.Mesh(new THREE.SphereGeometry(0.24, 12, 12), new THREE.MeshBasicMaterial({ color: 0xffdb99 }));
+        handGlow.position.set(0, 2.0, 0.6); coupleGroup.add(handGlow);
+
+        /* Motes & Fireflies */
+        var moteCount = 300;
+        var moteGeo = new THREE.BufferGeometry();
+        var motePos = new Float32Array(moteCount * 3);
+        var moteVel = [];
+        for (var m = 0; m < moteCount; m++) {
+          motePos[m * 3] = (Math.random() - 0.5) * 36;
+          motePos[m * 3 + 1] = Math.random() * 28 + 2;
+          motePos[m * 3 + 2] = -48 + (Math.random() - 0.5) * 40;
+          moteVel.push({ y: Math.random() * 0.012 + 0.004 });
+        }
+        moteGeo.setAttribute('position', new THREE.BufferAttribute(motePos, 3));
+        var motes = new THREE.Points(moteGeo, new THREE.PointsMaterial({ color: 0xffca7a, size: 0.85, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending }));
+        tajGroup.add(motes);
+
+        var heartCount = 50;
+        var heartGeo = new THREE.BufferGeometry();
+        var heartPos = new Float32Array(heartCount * 3);
+        for (var hc = 0; hc < heartCount; hc++) {
+          var ha = Math.random() * Math.PI * 2, hrad = Math.random() * 6 + 1;
+          heartPos[hc * 3] = Math.cos(ha) * hrad;
+          heartPos[hc * 3 + 1] = Math.random() * 8 + 1;
+          heartPos[hc * 3 + 2] = -48 + Math.sin(ha) * hrad;
+        }
+        heartGeo.setAttribute('position', new THREE.BufferAttribute(heartPos, 3));
+        var heartPoints = new THREE.Points(heartGeo, new THREE.PointsMaterial({ color: 0xff6b8b, size: 1.4, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending }));
+        tajGroup.add(heartPoints);
+
+        /* Camera Spline */
+        var camPoints = [
+          new THREE.Vector3(0, 9, 210),
+          new THREE.Vector3(0, 7.5, 140),
+          new THREE.Vector3(0, 11, 65),
+          new THREE.Vector3(0, 14, 38),
+          new THREE.Vector3(0, 14.5, 12),
+          new THREE.Vector3(0, 13.5, -12),
+          new THREE.Vector3(0, 12.5, -34),
+          new THREE.Vector3(0, 9.5, -42),
+          new THREE.Vector3(1.2, 9.2, -43.8)
+        ];
+        var lookPoints = [
+          new THREE.Vector3(0, 26, 0),
+          new THREE.Vector3(0, 24, 0),
+          new THREE.Vector3(0, 18, 15),
+          new THREE.Vector3(0, 16, 0),
+          new THREE.Vector3(0, 15, -15),
+          new THREE.Vector3(0, 22, -48),
+          new THREE.Vector3(0, 15, -48),
+          new THREE.Vector3(0, 9.5, -48),
+          new THREE.Vector3(0, 9.4, -48)
+        ];
+        var camSpline = new THREE.CatmullRomCurve3(camPoints, false, 'catmullrom', 0.15);
+        var lookSpline = new THREE.CatmullRomCurve3(lookPoints, false, 'catmullrom', 0.15);
+
+        var currentCamPos = new THREE.Vector3();
+        var currentLookPos = new THREE.Vector3();
+        camSpline.getPoint(0, currentCamPos);
+        lookSpline.getPoint(0, currentLookPos);
+        camera.position.copy(currentCamPos);
+        camera.lookAt(currentLookPos);
+
+        /* GSAP ScrollTrigger Pinned Timeline */
+        gsap.registerPlugin(ScrollTrigger);
+
+        var scrollState = { progress: 0, targetProgress: 0, mouseParallaxX: 0, mouseParallaxY: 0 };
+
+        /* Chapters Data for Anime-Style Cinematic HUD */
+        var chapters = [
+          {
+            num: "I \u00B7 Exterior",
+            title: "A Monument to Eternal Love",
+            desc: "Shimmering white Makrana marble glowing against the twilight sky. Scroll to journey inward."
+          },
+          {
+            num: "II \u00B7 Approach",
+            title: "The Walk of Reflections",
+            desc: "Lined with tranquil pools and whispering cypresses, every step mirrors an enduring devotion."
+          },
+          {
+            num: "III \u00B7 Portal",
+            title: "The Grand Pishtaq",
+            desc: "Framed with delicate pietra dura inlays and sacred verses, opening the gateway into eternity."
+          },
+          {
+            num: "IV \u00B7 Sanctum",
+            title: "The Heart of the Mausoleum",
+            desc: "Beneath the vaulted dome, pierced jali screens cast celestial patterns of light."
+          },
+          {
+            num: "V \u00B7 Forever",
+            title: "Where My World Begins & Ends",
+            desc: "Four years together, and every single moment with you is my favorite memory. Happy Birthday, Kowsy \u2764\uFE0F"
+          }
+        ];
+
+        var chNumEl = document.getElementById('taj-ch-num');
+        var chTitleEl = document.getElementById('taj-ch-title');
+        var chDescEl = document.getElementById('taj-ch-desc');
+        var chDisplayEl = document.getElementById('taj-chapter-display');
+        var tajDots = document.querySelectorAll('.taj-chapter-dot');
+        var tajScrollInd = document.getElementById('taj-scroll-ind');
+        var btnEnterBday = document.getElementById('btn-enter-bday');
+        var btnExploreTaj = document.getElementById('btn-explore-taj');
+        var currentChapterIdx = -1;
+
+        function setTajChapter(idx) {
+          if (idx === currentChapterIdx || idx < 0 || idx >= chapters.length) return;
+          currentChapterIdx = idx;
+          var data = chapters[idx];
+
+          if (chDisplayEl) {
+            chDisplayEl.classList.add('fading');
+            setTimeout(function () {
+              if (chNumEl) chNumEl.textContent = data.num;
+              if (chTitleEl) chTitleEl.textContent = data.title;
+              if (chDescEl) chDescEl.textContent = data.desc;
+              chDisplayEl.classList.remove('fading');
+            }, 220);
+          } else {
+            if (chNumEl) chNumEl.textContent = data.num;
+            if (chTitleEl) chTitleEl.textContent = data.title;
+            if (chDescEl) chDescEl.textContent = data.desc;
+          }
+
+          tajDots.forEach(function (dot, i) {
+            if (i === idx) dot.classList.add('active');
+            else dot.classList.remove('active');
+          });
+
+          if (idx === 4) {
+            if (btnEnterBday) btnEnterBday.classList.add('visible');
+            if (btnExploreTaj) btnExploreTaj.classList.add('visible');
+          } else {
+            if (btnEnterBday) btnEnterBday.classList.remove('visible');
+            if (btnExploreTaj) btnExploreTaj.classList.remove('visible');
+          }
+        }
+
+        function updateTajUI(prog) {
+          var idx = 0;
+          if (prog < 0.20) idx = 0;
+          else if (prog < 0.45) idx = 1;
+          else if (prog < 0.70) idx = 2;
+          else if (prog < 0.88) idx = 3;
+          else idx = 4;
+
+          setTajChapter(idx);
+
+          if (tajScrollInd) {
+            if (prog > 0.08) {
+              tajScrollInd.style.opacity = '0';
+              tajScrollInd.style.pointerEvents = 'none';
+            } else {
+              tajScrollInd.style.opacity = '1';
+              tajScrollInd.style.pointerEvents = 'auto';
+            }
+          }
+        }
+
+        // Interactive chapter dot click navigation
+        tajDots.forEach(function (dot, i) {
+          dot.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var tajSection = document.getElementById('taj-experience');
+            if (!tajSection) return;
+            var targets = [0.01, 0.25, 0.52, 0.76, 0.96];
+            var totalDist = tajSection.offsetHeight - window.innerHeight;
+            var targetScrollY = tajSection.offsetTop + (targets[i] * totalDist);
+            window.scrollTo({ top: targetScrollY, behavior: 'smooth' });
+          });
+        });
+
+        var isTajActive = true;
+        ScrollTrigger.create({
+          trigger: '#taj-experience',
+          start: 'top top',
+          end: 'bottom bottom',
+          scrub: 1.2,
+          onUpdate: function (self) {
+            scrollState.targetProgress = self.progress;
+            updateTajUI(self.progress);
+          },
+          onToggle: function (self) {
+            isTajActive = self.isActive;
+          }
+        });
+        updateTajUI(0);
+
+        /* Parallax */
+        var targetMouseX = 0, targetMouseY = 0;
+        window.addEventListener('mousemove', function (e) {
+          targetMouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+          targetMouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+        });
+
+        /* Procedural Web Audio Ambient Synthesizer */
+        var audioCtx = null, isAudioPlaying = false, audioGain = null, chimeTimer = null;
+        function initTajAudio() {
+          if (audioCtx) return;
+          var AudioContext = window.AudioContext || window.webkitAudioContext;
+          audioCtx = new AudioContext();
+          audioGain = audioCtx.createGain();
+          audioGain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+          audioGain.connect(audioCtx.destination);
+          [65.41, 98.00, 130.81, 164.81, 196.00].forEach(function (freq) {
+            var osc = audioCtx.createOscillator();
+            var g = audioCtx.createGain();
+            osc.type = 'sine'; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            g.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            osc.connect(g); g.connect(audioGain); osc.start();
+          });
+          function playChime() {
+            if (!isAudioPlaying || !audioCtx) return;
+            var freqs = [261.63, 329.63, 392.00, 523.25, 659.25];
+            var f = freqs[Math.floor(Math.random() * freqs.length)];
+            var osc = audioCtx.createOscillator(), g = audioCtx.createGain();
+            osc.type = 'triangle'; osc.frequency.setValueAtTime(f, audioCtx.currentTime);
+            g.gain.setValueAtTime(0.001, audioCtx.currentTime);
+            g.gain.linearRampToValueAtTime(0.07, audioCtx.currentTime + 0.1);
+            g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 4.5);
+            osc.connect(g); g.connect(audioGain); osc.start(); osc.stop(audioCtx.currentTime + 4.6);
+            chimeTimer = setTimeout(playChime, 3000 + Math.random() * 4000);
+          }
+          chimeTimer = setTimeout(playChime, 1500);
+        }
+
+        var audioBtn = document.getElementById('taj-audio-btn');
+        var audioIcon = document.getElementById('taj-audio-icon');
+        var audioLabel = document.getElementById('taj-audio-label');
+        if (audioBtn) {
+          audioBtn.addEventListener('click', function () {
+            if (!audioCtx) initTajAudio();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            if (!isAudioPlaying) {
+              isAudioPlaying = true;
+              audioGain.gain.linearRampToValueAtTime(0.35, audioCtx.currentTime + 1.2);
+              audioIcon.textContent = '🔊'; audioLabel.textContent = 'Mute';
+            } else {
+              isAudioPlaying = false;
+              audioGain.gain.linearRampToValueAtTime(0.001, audioCtx.currentTime + 0.8);
+              audioIcon.textContent = '🔇'; audioLabel.textContent = 'Ambient Sound';
+            }
+          });
+        }
+
+        /* Interactive Buttons */
+        var exitOrbitBtn = document.getElementById('taj-exit-orbit');
+
+        if (btnEnterBday) {
+          btnEnterBday.addEventListener('click', function () {
+            if (controls.enabled) { controls.enabled = false; if (orbitHint) orbitHint.style.display = 'none'; }
+            var heroEl = document.getElementById('hero-section');
+            if (heroEl) { heroEl.scrollIntoView({ behavior: 'smooth' }); }
+          });
+        }
+
+        if (btnExploreTaj) {
+          btnExploreTaj.addEventListener('click', function () {
+            controls.enabled = true;
+            controls.target.set(0, 9.4, -48);
+            controls.update();
+            if (orbitHint) {
+              orbitHint.style.display = 'flex';
+              orbitHint.style.alignItems = 'center';
+            }
+          });
+        }
+
+        if (exitOrbitBtn) {
+          exitOrbitBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            controls.enabled = false;
+            if (orbitHint) orbitHint.style.display = 'none';
+          });
+        }
+
+        /* Animation Loop */
+        var clock = new THREE.Clock();
+        var idealCamPos = new THREE.Vector3();
+        var idealLookPos = new THREE.Vector3();
+
+        function renderTaj() {
+          requestAnimationFrame(renderTaj);
+          if (!isTajActive && !controls.enabled) return; // Save GPU when scrolled down
+
+          var time = clock.getElapsedTime();
+          scrollState.progress += (scrollState.targetProgress - scrollState.progress) * 0.08;
+          scrollState.mouseParallaxX += (targetMouseX - scrollState.mouseParallaxX) * 0.05;
+          scrollState.mouseParallaxY += (targetMouseY - scrollState.mouseParallaxY) * 0.05;
+
+          if (!controls.enabled) {
+            var t = Math.max(0.0001, Math.min(0.9999, scrollState.progress));
+            camSpline.getPoint(t, idealCamPos);
+            lookSpline.getPoint(t, idealLookPos);
+            var pDist = (1 - t * 0.5) * 2.2;
+            idealCamPos.x += scrollState.mouseParallaxX * pDist;
+            idealCamPos.y += -scrollState.mouseParallaxY * (pDist * 0.5);
+            camera.position.lerp(idealCamPos, 0.12);
+            currentLookPos.lerp(idealLookPos, 0.12);
+            camera.lookAt(currentLookPos);
+          } else {
+            controls.update();
+          }
+
+          lanternGroup.rotation.z = Math.sin(time * 1.6) * 0.05;
+          lanternGroup.rotation.x = Math.cos(time * 1.3) * 0.04;
+          archLanternLight.intensity = 2.0 + Math.sin(time * 8.0) * 0.25;
+          sanctumLight.intensity = 3.0 + Math.sin(time * 5.0) * 0.2;
+          waterMesh.position.y = 0.35 + Math.sin(time * 1.5) * 0.03;
+
+          var pArr = moteGeo.attributes.position.array;
+          for (var mi = 0; mi < moteCount; mi++) {
+            pArr[mi * 3 + 1] += moteVel[mi].y;
+            pArr[mi * 3] += Math.sin(time + mi) * 0.008;
+            if (pArr[mi * 3 + 1] > 32) pArr[mi * 3 + 1] = 2;
+          }
+          moteGeo.attributes.position.needsUpdate = true;
+
+          var hArr = heartGeo.attributes.position.array;
+          for (var hi = 0; hi < heartCount; hi++) {
+            var angle = time * 0.5 + hi;
+            hArr[hi * 3] += Math.cos(angle) * 0.015;
+            hArr[hi * 3 + 1] += Math.sin(angle * 1.2) * 0.012;
+            hArr[hi * 3 + 2] += Math.sin(angle) * 0.015;
+          }
+          heartGeo.attributes.position.needsUpdate = true;
+
+          renderer.render(scene, camera);
+        }
+        renderTaj();
+
+        window.addEventListener('resize', function () {
+          camera.aspect = window.innerWidth / window.innerHeight;
+          camera.fov = window.innerWidth < 768 ? 58 : 48;
+          camera.updateProjectionMatrix();
+          renderer.setSize(window.innerWidth, window.innerHeight);
+          renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        });
+        if (window.innerWidth < 768) { camera.fov = 58; camera.updateProjectionMatrix(); }
+      })();
+
+      /* ---------- floating hearts on load ---------- */
+      var heartsWrap = document.getElementById('hearts');
+      var heartChars = ['\u2764\ufe0f', '\u2665', '\u2661'];
+      if (!reduceMotion && heartsWrap) {
+        for (var i = 0; i < 16; i++) {
+          var h = document.createElement('span');
+          h.textContent = heartChars[Math.floor(Math.random() * heartChars.length)];
+          h.style.left = (Math.random() * 100) + '%';
+          h.style.setProperty('--drift', (Math.random() * 80 - 40) + 'px');
+          h.style.animationDuration = (9 + Math.random() * 8) + 's';
+          h.style.animationDelay = (Math.random() * 10) + 's';
+          h.style.fontSize = (1 + Math.random() * 1.4) + 'rem';
+          heartsWrap.appendChild(h);
+        }
+      }
+
+      /* ---------- birthday intro: fireworks + dismiss ---------- */
+      (function () {
+        var overlay = document.getElementById('introOverlay');
+        var skipBtn = document.getElementById('introSkip');
+        var iCanvas = document.getElementById('introCanvas');
+        if (!overlay || !iCanvas) return;
+        var ictx = iCanvas.getContext('2d');
+        var dismissed = false;
+        var launchTimer = null;
+        var rafId = null;
+
+        function resizeIntro() { iCanvas.width = window.innerWidth; iCanvas.height = window.innerHeight; }
+        resizeIntro();
+        window.addEventListener('resize', resizeIntro);
+
+        var fwColors = ['#ff9db4', '#ffd166', '#c9184a', '#ffe9ec', '#a6f3d0', '#9fd3ff'];
+        var rockets = [];
+        var sparks = [];
+
+        function launchFirework() {
+          var w = iCanvas.width, h = iCanvas.height;
+          var x = w * (0.15 + Math.random() * 0.7);
+          var burstY = h * (0.16 + Math.random() * 0.32);
+          rockets.push({
+            x: x, y: h + 10, burstY: burstY,
+            vy: -(8 + Math.random() * 3),
+            color: fwColors[Math.floor(Math.random() * fwColors.length)]
+          });
+        }
+
+        function explode(x, y, color) {
+          var count = 46;
+          for (var i = 0; i < count; i++) {
+            var angle = (Math.PI * 2 * i) / count + Math.random() * 0.2;
+            var speed = 2 + Math.random() * 4;
+            sparks.push({
+              x: x, y: y,
+              vx: Math.cos(angle) * speed,
+              vy: Math.sin(angle) * speed,
+              color: color,
+              life: 0,
+              size: 2 + Math.random() * 2
+            });
+          }
+        }
+
+        function introTick() {
+          ictx.clearRect(0, 0, iCanvas.width, iCanvas.height);
+          for (var r = rockets.length - 1; r >= 0; r--) {
+            var rk = rockets[r];
+            rk.y += rk.vy;
+            ictx.beginPath();
+            ictx.strokeStyle = rk.color;
+            ictx.lineWidth = 2;
+            ictx.globalAlpha = 0.8;
+            ictx.moveTo(rk.x, rk.y);
+            ictx.lineTo(rk.x, rk.y - rk.vy * 2.2);
+            ictx.stroke();
+            ictx.globalAlpha = 1;
+            if (rk.y <= rk.burstY) {
+              explode(rk.x, rk.y, rk.color);
+              rockets.splice(r, 1);
+            }
+          }
+          for (var s = sparks.length - 1; s >= 0; s--) {
+            var sp = sparks[s];
+            sp.vy += 0.05;
+            sp.x += sp.vx; sp.y += sp.vy; sp.life++;
+            var alpha = Math.max(0, 1 - sp.life / 70);
+            if (alpha <= 0) { sparks.splice(s, 1); continue; }
+            ictx.globalAlpha = alpha;
+            ictx.fillStyle = sp.color;
+            ictx.beginPath();
+            ictx.arc(sp.x, sp.y, sp.size, 0, Math.PI * 2);
+            ictx.fill();
+            ictx.globalAlpha = 1;
+          }
+          rafId = requestAnimationFrame(introTick);
+        }
+
+        function stopIntroFireworks() {
+          if (launchTimer) { clearInterval(launchTimer); launchTimer = null; }
+          if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+          ictx.clearRect(0, 0, iCanvas.width, iCanvas.height);
+        }
+
+        function dismissIntro() {
+          if (dismissed) return;
+          dismissed = true;
+          overlay.classList.add('hide');
+          document.body.style.overflow = '';
+          stopIntroFireworks();
+          setTimeout(function () { overlay.remove(); }, 650);
+        }
+
+        document.body.style.overflow = 'hidden';
+        skipBtn.addEventListener('click', dismissIntro);
+        overlay.addEventListener('click', function (e) { if (e.target === overlay) dismissIntro(); });
+
+        if (reduceMotion) {
+          setTimeout(dismissIntro, 1600);
+        } else {
+          introTick();
+          launchFirework();
+          launchTimer = setInterval(launchFirework, 480);
+          setTimeout(dismissIntro, 5200);
+        }
+      })();
+
+      /* ---------- scroll-triggered floating icons ---------- */
+      (function () {
+        if (reduceMotion) return;
+        var scrollIcons = ['\u2764\ufe0f', '\ud83d\udc37', '\ud83c\udf82', '\ud83c\udf88'];
+        var lastScrollSpawn = 0;
+        function spawnScrollIcon() {
+          var el = document.createElement('span');
+          el.className = 'scroll-pop';
+          el.textContent = scrollIcons[Math.floor(Math.random() * scrollIcons.length)];
+          el.style.left = (5 + Math.random() * 90) + 'vw';
+          el.style.setProperty('--drift', (Math.random() * 90 - 45) + 'px');
+          var dur = 2.4 + Math.random() * 1.4;
+          el.style.animationDuration = dur + 's';
+          el.style.fontSize = (1.3 + Math.random() * 1.1) + 'rem';
+          document.body.appendChild(el);
+          setTimeout(function () { el.remove(); }, dur * 1000 + 150);
+        }
+        window.addEventListener('scroll', function () {
+          var now = Date.now();
+          if (now - lastScrollSpawn < 260) return;
+          lastScrollSpawn = now;
+          spawnScrollIcon();
+        }, { passive: true });
+      })();
+
+      /* ---------- confetti ---------- */
+      var canvas = document.getElementById('confetti');
+      var ctx = canvas.getContext('2d');
+      function resizeConfetti() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+      resizeConfetti(); window.addEventListener('resize', resizeConfetti);
+      var particles = [];
+      var confettiColors = ['#c9184a', '#ffb4c2', '#cf9c53', '#ff8fa3', '#fff'];
+      function burstConfetti(x, y, count) {
+        for (var i = 0; i < count; i++) {
+          var angle = Math.random() * Math.PI * 2;
+          var speed = 3 + Math.random() * 6;
+          particles.push({
+            x: x, y: y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed - 4,
+            size: 4 + Math.random() * 5,
+            color: confettiColors[Math.floor(Math.random() * confettiColors.length)],
+            rot: Math.random() * Math.PI,
+            vrot: (Math.random() - 0.5) * 0.3,
+            life: 0
+          });
+        }
+        if (!animating) { animating = true; requestAnimationFrame(tickConfetti); }
+      }
+      var animating = false;
+      function tickConfetti() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        var alive = false;
+        for (var i = particles.length - 1; i >= 0; i--) {
+          var p = particles[i];
+          p.vy += 0.12;
+          p.x += p.vx; p.y += p.vy; p.rot += p.vrot; p.life++;
+          if (p.life > 160 || p.y > canvas.height + 40) { particles.splice(i, 1); continue; }
+          alive = true;
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.rot);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+          ctx.restore();
+        }
+        if (alive) { requestAnimationFrame(tickConfetti); } else { animating = false; }
+      }
+
+      var wishBtnEl = document.getElementById('wishBtn');
+      if (wishBtnEl) {
+        wishBtnEl.addEventListener('click', function (e) {
+          var r = e.target.getBoundingClientRect();
+          burstConfetti(r.left + r.width / 2, r.top + r.height / 2, 140);
+          e.target.textContent = "Wish made \u2764\ufe0f";
+          setTimeout(function () { e.target.textContent = "Happy birthday, panni kutty \ud83d\udc37"; }, 2200);
+        });
+      }
+
+      /* ---------- since 23/09/2001: live age + countdown ---------- */
+      var BIRTH_DATE = new Date(2001, 8, 23, 0, 0, 0);
+      function pulse(el) {
+        el.classList.add('tick');
+        setTimeout(function () { el.classList.remove('tick'); }, 200);
+      }
+      function setStat(el, value) {
+        var str = String(value);
+        if (el && el.textContent !== str) { el.textContent = str; pulse(el); }
+      }
+      function pad2(n) { return n < 10 ? '0' + n : String(n); }
+
+      var elYears = document.getElementById('statYears');
+      var elMonths = document.getElementById('statMonths');
+      var elDays = document.getElementById('statDays');
+      var elSub = document.getElementById('ageSub');
+      var elCdDays = document.getElementById('cdDays');
+      var elCdHours = document.getElementById('cdHours');
+      var elCdMins = document.getElementById('cdMins');
+      var elCdSecs = document.getElementById('cdSecs');
+
+      function updateAge() {
+        var now = new Date();
+        var years = now.getFullYear() - BIRTH_DATE.getFullYear();
+        var months = now.getMonth() - BIRTH_DATE.getMonth();
+        var days = now.getDate() - BIRTH_DATE.getDate();
+        if (days < 0) {
+          months--;
+          var prevMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+          days += prevMonth.getDate();
+        }
+        if (months < 0) { years--; months += 12; }
+        setStat(elYears, years);
+        setStat(elMonths, months);
+        setStat(elDays, days);
+
+        var totalMs = now - BIRTH_DATE;
+        var totalDays = Math.floor(totalMs / 86400000);
+        if (elSub) elSub.textContent = totalDays.toLocaleString() + ' days alive, and every single one better for the people around you.';
+
+        var nextBday = new Date(now.getFullYear(), 8, 23, 0, 0, 0);
+        if (now > nextBday) { nextBday = new Date(now.getFullYear() + 1, 8, 23, 0, 0, 0); }
+        var diff = nextBday - now;
+        var d = Math.floor(diff / 86400000);
+        var h = Math.floor((diff % 86400000) / 3600000);
+        var m = Math.floor((diff % 3600000) / 60000);
+        var s = Math.floor((diff % 60000) / 1000);
+        setStat(elCdDays, pad2(d));
+        setStat(elCdHours, pad2(h));
+        setStat(elCdMins, pad2(m));
+        setStat(elCdSecs, pad2(s));
+      }
+      updateAge();
+      setInterval(updateAge, 1000);
+
+      /* ---------- quiz ---------- */
+      var quizData = [
+        {
+          q: "Where were we when things first felt real?",
+          options: ["Somewhere ordinary that became our place", "On a call that ran three hours too long", "Mid-argument that somehow ended in laughing", "I still can't pin the exact moment"],
+          responses: [
+            "That's the thing about us \u2014 the ordinary places became the good ones.",
+            "Those calls were never really about the topic, were they.",
+            "Classic us. Even the arguments turn into something soft.",
+            "Some things don't need a pin on the map. They just are."
+          ]
+        },
+        {
+          q: "My most annoying habit, if we're honest:",
+          options: ["Leaving you on read for way too long", "Being right and making sure you know it", "Never picking the restaurant", "Stealing the blanket, every single time"],
+          responses: [
+            "Guilty. Working on it. Slowly.",
+            "In my defense... I usually am.",
+            "\u201cWhatever you want\u201d is a personality trait at this point.",
+            "The blanket incident count is not going down this year."
+          ]
+        },
+        {
+          q: "The thing you do that gets me every time:",
+          options: ["That laugh you try to hide", "How you remember the tiny details", "The way you fight for the people you love", "Your terrible, wonderful jokes"],
+          responses: [
+            "It never actually stays hidden. I always notice.",
+            "You'd be surprised what I remember about you too.",
+            "That's the part of you I trust the most.",
+            "Terrible is doing a lot of work in that sentence, and I love it anyway."
+          ]
+        },
+        {
+          q: "If year four had a theme song, it'd be:",
+          options: ["Something slow and a little cheesy", "Whatever was playing on our worst road trip", "Our shared, deeply questionable guilty pleasure", "No song, just the sound of us laughing"],
+          responses: [
+            "Cheesy suits us. We've earned it.",
+            "That road trip is officially folklore now.",
+            "No shame. Never any shame.",
+            "Honestly the best soundtrack we could ask for."
+          ]
+        },
+        {
+          q: "What I'm most looking forward to in year five:",
+          options: ["More ordinary Tuesdays with you", "Wherever we end up living next", "All the plans we keep half-joking about", "Just... more of this. However it looks"],
+          responses: [
+            "Same. The ordinary days with you are the good ones.",
+            "Wherever it is, it'll feel like home because you're there.",
+            "Let's stop half-joking and actually do one of them this year.",
+            "However it looks, I'm in. Every year, I'm in."
+          ]
+        }
+      ];
+      var qIndex = 0;
+      var picks = [];
+      var progressEl = document.getElementById('quizProgress');
+      var bodyEl = document.getElementById('quizBody');
+
+      if (progressEl) {
+        for (var qi = 0; qi < quizData.length; qi++) {
+          var bar = document.createElement('i');
+          progressEl.appendChild(bar);
+        }
+      }
+
+      function renderQuiz() {
+        if (!bodyEl || !progressEl) return;
+        if (qIndex >= quizData.length) { renderQuizResult(); return; }
+        var bars = progressEl.children;
+        for (var i = 0; i < bars.length; i++) { bars[i].className = i < qIndex ? 'done' : ''; }
+        var item = quizData[qIndex];
+        bodyEl.innerHTML = '';
+        var qEl = document.createElement('div');
+        qEl.className = 'quiz-q';
+        qEl.textContent = item.q;
+        bodyEl.appendChild(qEl);
+        var optWrap = document.createElement('div');
+        optWrap.className = 'quiz-options';
+        item.options.forEach(function (opt, idx) {
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.textContent = opt;
+          b.addEventListener('click', function () {
+            picks.push({ optionIndex: idx, response: item.responses[idx] });
+            qIndex++;
+            renderQuiz();
+          });
+          optWrap.appendChild(b);
+        });
+        bodyEl.appendChild(optWrap);
+      }
+
+      function renderQuizResult() {
+        var bars = progressEl.children;
+        for (var i = 0; i < bars.length; i++) { bars[i].className = 'done'; }
+        bodyEl.innerHTML = '';
+        var wrap = document.createElement('div');
+        wrap.className = 'quiz-result show';
+        var title = document.createElement('div');
+        title.className = 'score';
+        title.textContent = '100%';
+        wrap.appendChild(title);
+        var lead = document.createElement('p');
+        lead.style.marginTop = '6px';
+        lead.textContent = "There was never a wrong answer \u2014 here's what I heard:";
+        wrap.appendChild(lead);
+        var list = document.createElement('div');
+        list.style.display = 'grid';
+        list.style.gap = '10px';
+        list.style.marginTop = '14px';
+        picks.forEach(function (p) {
+          var line = document.createElement('p');
+          line.style.margin = '0';
+          line.style.padding = '14px 16px';
+          line.style.background = 'var(--bg-soft)';
+          line.style.borderRadius = '12px';
+          line.style.color = 'var(--ink)';
+          line.textContent = p.response;
+          list.appendChild(line);
+        });
+        wrap.appendChild(list);
+        var retry = document.createElement('button');
+        retry.className = 'btn ghost';
+        retry.type = 'button';
+        retry.style.marginTop = '20px';
+        retry.textContent = 'Take it again';
+        retry.addEventListener('click', function () { qIndex = 0; picks = []; renderQuiz(); });
+        wrap.appendChild(retry);
+        bodyEl.appendChild(wrap);
+      }
+      renderQuiz();
+
+      /* ---------- memory game ---------- */
+      var symbols = ['\u2764\ufe0f', '\ud83d\udc8b', '\ud83d\udc95', '\ud83c\udf39', '\u2728', '\ud83c\udf70', '\ud83d\udc96', '\ud83d\udc8c'];
+      var deck = symbols.concat(symbols);
+      var board = document.getElementById('board');
+      var moveCountEl = document.getElementById('moveCount');
+      var matchCountEl = document.getElementById('matchCount');
+      var gameWinEl = document.getElementById('gameWin');
+      var flipped = [];
+      var lock = false;
+      var moves = 0;
+      var matched = 0;
+
+      function shuffle(arr) {
+        for (var i = arr.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+        }
+        return arr;
+      }
+
+      function buildBoard() {
+        if (!board) return;
+        board.innerHTML = '';
+        flipped = []; lock = false; moves = 0; matched = 0;
+        if (moveCountEl) moveCountEl.textContent = '0';
+        if (matchCountEl) matchCountEl.textContent = '0 / 8';
+        if (gameWinEl) gameWinEl.classList.remove('show');
+        var cards = shuffle(deck.slice());
+        cards.forEach(function (sym) {
+          var tile = document.createElement('div');
+          tile.className = 'tile';
+          tile.setAttribute('role', 'button');
+          tile.setAttribute('tabindex', '0');
+          tile.innerHTML = '<span class="face-back">\u2661</span><span class="face-front">' + sym + '</span>';
+          tile.dataset.symbol = sym;
+          function activate() {
+            if (lock || tile.classList.contains('flipped') || tile.classList.contains('matched')) return;
+            tile.classList.add('flipped');
+            flipped.push(tile);
+            if (flipped.length === 2) {
+              moves++; if (moveCountEl) moveCountEl.textContent = String(moves);
+              lock = true;
+              var a = flipped[0], b = flipped[1];
+              if (a.dataset.symbol === b.dataset.symbol) {
+                a.classList.add('matched'); b.classList.add('matched');
+                matched++;
+                if (matchCountEl) matchCountEl.textContent = matched + ' / 8';
+                flipped = []; lock = false;
+                if (matched === 8) {
+                  if (gameWinEl) gameWinEl.classList.add('show');
+                  var r = board.getBoundingClientRect();
+                  burstConfetti(r.left + r.width / 2, r.top + r.height / 2, 100);
+                }
+              } else {
+                setTimeout(function () {
+                  a.classList.remove('flipped'); b.classList.remove('flipped');
+                  flipped = []; lock = false;
+                }, 700);
+              }
+            }
+          }
+          tile.addEventListener('click', activate);
+          tile.addEventListener('keydown', function (ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); activate(); } });
+          board.appendChild(tile);
+        });
+      }
+      buildBoard();
+      var resetBtn = document.getElementById('resetGame');
+      if (resetBtn) resetBtn.addEventListener('click', buildBoard);
+
+      /* ---------- visual novel ---------- */
+      (function () {
+        var dialogue = [
+          { speaker: "Arun", text: "Hey... is this seat taken?", boyActive: true, girlActive: false, choc: false },
+          { speaker: "Kowsalya", text: "Nope. All yours.", boyActive: false, girlActive: true, choc: false },
+          { speaker: "Arun", text: "I, uh... brought this. Thought you might want it.", boyActive: true, girlActive: false, choc: true },
+          { speaker: "Kowsalya", text: "A Dairy Milk? Before the lecture even starts?", boyActive: false, girlActive: true, choc: true },
+          { speaker: "Arun", text: "Best time for it, honestly.", boyActive: true, girlActive: false, choc: true },
+          { speaker: "Kowsalya", text: "You're ridiculous. ...Thank you, though.", boyActive: false, girlActive: true, choc: true },
+          { speaker: "Arun", text: "Four years later and that chocolate was the best investment I ever made.", boyActive: true, girlActive: true, choc: true }
+        ];
+        var step = 0;
+        var speakerEl = document.getElementById('vnSpeaker');
+        var textEl = document.getElementById('vnText');
+        var nextBtn = document.getElementById('vnNext');
+        var boyEl = document.getElementById('chibiBoy');
+        var girlEl = document.getElementById('chibiGirl');
+        var chocEl = document.getElementById('vnChoc');
+
+        function renderVN() {
+          if (!speakerEl || !textEl || !nextBtn) return;
+          var d = dialogue[step];
+          speakerEl.textContent = d.speaker;
+          textEl.textContent = d.text;
+          if (boyEl) boyEl.classList.toggle('active', d.boyActive);
+          if (girlEl) girlEl.classList.toggle('active', d.girlActive);
+          if (chocEl) chocEl.classList.toggle('show', d.choc);
+          if (step === dialogue.length - 1) {
+            nextBtn.textContent = "Start over";
+          } else {
+            nextBtn.textContent = "Next";
+          }
+        }
+        if (nextBtn) {
+          nextBtn.addEventListener('click', function () {
+            step = (step + 1) % dialogue.length;
+            renderVN();
+            if (step === 2 || step === dialogue.length - 1) {
+              var r = nextBtn.getBoundingClientRect();
+              burstConfetti(r.left + r.width / 2, r.top + r.height / 2, 40);
+            }
+          });
+          renderVN();
+        }
+      })();
+
+      /* ---------- serious questions (dodge, shrink, multiply) ---------- */
+      var dodgeCaptions = [
+        "nice try.", "nope, not today.", "you'll have to be quicker than that.",
+        "this button has commitment issues, apparently.", "still no. try Yes.",
+        "it's getting shy, look at it go.", "okay this is just embarrassing for the No button now.",
+        "at this point it's basically cardio.", "the No button would like a restraining order.",
+        "honestly impressive persistence. still no."
+      ];
+
+      document.querySelectorAll('.qbox').forEach(function (qBox) {
+        var card = qBox.closest('.card');
+        var type = qBox.dataset.type || 'dodge';
+        var btnRow = qBox.querySelector('.btn-row');
+        var btnYes = qBox.querySelector('[data-yes]');
+        var btnNo = qBox.querySelector('[data-no]');
+        var caption = qBox.querySelector('.caption');
+        var attemptsEl = qBox.querySelector('.attempts');
+        var result = card.querySelector('.serious-result');
+        var resultText = card.querySelector('[data-result-text]');
+        var baseResultText = resultText ? resultText.textContent : '';
+        var dodgeCount = 0;
+        var noFixed = false;
+        var lastDodgeAt = 0;
+        var ghostColors = ['No', 'Nope', 'Not this one', 'Try again', 'Still no'];
+
+        function randomSpot() {
+          var boxRect = qBox.getBoundingClientRect();
+          var btnRect = btnNo.getBoundingClientRect();
+          var margin = 12;
+          var maxLeft = boxRect.width - btnRect.width - margin;
+          var maxTop = boxRect.height - btnRect.height - margin;
+          return {
+            left: margin + Math.random() * Math.max(0, maxLeft - margin),
+            top: margin + Math.random() * Math.max(0, maxTop - margin)
+          };
+        }
+
+        function spawnGhost() {
+          var boxRect = qBox.getBoundingClientRect();
+          var ghost = document.createElement('span');
+          ghost.className = 'no-ghost';
+          ghost.textContent = ghostColors[Math.floor(Math.random() * ghostColors.length)];
+          ghost.style.left = (10 + Math.random() * Math.max(0, boxRect.width - 120)) + 'px';
+          ghost.style.top = (10 + Math.random() * Math.max(0, boxRect.height - 50)) + 'px';
+          qBox.appendChild(ghost);
+          setTimeout(function () { ghost.remove(); }, 900);
+        }
+
+        function dodgeNo() {
+          if (noFixed) return;
+          var nowTs = Date.now();
+          if (nowTs - lastDodgeAt < 220) return;
+          lastDodgeAt = nowTs;
+          var spot = randomSpot();
+          btnNo.style.left = Math.max(0, spot.left) + 'px';
+          btnNo.style.top = Math.max(0, spot.top) + 'px';
+          dodgeCount++;
+
+          if (type === 'shrink') {
+            var scale = Math.max(0.4, 1 - dodgeCount * 0.11);
+            btnNo.style.transform = 'scale(' + scale + ')';
+          }
+          if (type === 'multiply' && dodgeCount <= 6) {
+            spawnGhost();
+            if (dodgeCount >= 3) spawnGhost();
+          }
+
+          var capIndex = Math.min(dodgeCount - 1, dodgeCaptions.length - 1);
+          caption.textContent = dodgeCaptions[capIndex];
+          attemptsEl.textContent = dodgeCount === 1 ? 'attempts to click No: 1' : ('attempts to click No: ' + dodgeCount);
+        }
+
+        function placeNoInitially() {
+          var boxRect = qBox.getBoundingClientRect();
+          var btnRect = btnNo.getBoundingClientRect();
+          btnNo.style.left = (boxRect.width / 2 - btnRect.width / 2 + 90) + 'px';
+          btnNo.style.top = (boxRect.height / 2 - btnRect.height / 2) + 'px';
+        }
+        window.addEventListener('load', placeNoInitially);
+        setTimeout(placeNoInitially, 100);
+
+        btnNo.addEventListener('mouseenter', dodgeNo);
+        btnNo.addEventListener('touchstart', function (ev) { ev.preventDefault(); dodgeNo(); }, { passive: false });
+        btnNo.addEventListener('click', function (ev) { ev.preventDefault(); dodgeNo(); });
+
+        btnYes.addEventListener('click', function (e) {
+          noFixed = true;
+          var r = e.target.getBoundingClientRect();
+          burstConfetti(r.left + r.width / 2, r.top + r.height / 2, 90);
+          btnRow.style.display = 'none';
+          caption.textContent = '';
+          attemptsEl.textContent = '';
+          qBox.querySelectorAll('.no-ghost').forEach(function (g) { g.remove(); });
+          result.classList.add('show');
+          if (dodgeCount > 0 && resultText) {
+            resultText.textContent = baseResultText + " (took the No button dodging you " + dodgeCount + " time" + (dodgeCount === 1 ? '' : 's') + " to get here.)";
+          }
+        });
+      });
+
+      /* ---------- campus love story ---------- */
+      (function () {
+        var sceneWrap = document.getElementById('sceneWrap');
+        var sceneChars = document.getElementById('sceneChars');
+        var scenePrompt = document.getElementById('scenePrompt');
+        var sceneOptions = document.getElementById('sceneOptions');
+        var sceneResult = document.getElementById('sceneResult');
+
+        if (sceneWrap && !reduceMotion) {
+          function applyTilt(clientX, clientY) {
+            var rect = sceneWrap.getBoundingClientRect();
+            var px = (clientX - rect.left) / rect.width;
+            var py = (clientY - rect.top) / rect.height;
+            var rotY = (px - 0.5) * 18;
+            var rotX = (0.5 - py) * 12;
+            sceneChars.style.transform = 'rotateX(' + rotX + 'deg) rotateY(' + rotY + 'deg)';
+          }
+          sceneWrap.addEventListener('mousemove', function (e) { applyTilt(e.clientX, e.clientY); });
+          sceneWrap.addEventListener('mouseleave', function () { sceneChars.style.transform = 'rotateX(0deg) rotateY(0deg)'; });
+        }
+
+        var outcomes = {
+          choco: {
+            text: "Arun slides a little chocolate across the desk without a word. Kowsalya tries not to smile. She fails completely.",
+            after: "After class, they walk out together, and the chocolate wrapper somehow ends up saved in her notebook."
+          },
+          note: {
+            text: "A folded note lands on her desk: \u201cAre you free after class?\u201d She writes back one word: \u201cObviously.\u201d",
+            after: "After class, they walk out together, note still tucked safely in her bag."
+          },
+          stare: {
+            text: "Arun just stares. Full panic. Zero words spoken. Kowsalya waves first, because someone has to.",
+            after: "After class, they walk out together anyway \u2014 turns out panic is a personality trait she's fond of."
+          }
+        };
+
+        if (sceneOptions) {
+          sceneOptions.querySelectorAll('button').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+              var choice = outcomes[btn.dataset.choice];
+              sceneOptions.style.display = 'none';
+              scenePrompt.textContent = 'Chapter One, continued:';
+              sceneResult.classList.add('show');
+              sceneResult.innerHTML = '';
+              var p1 = document.createElement('p');
+              p1.textContent = choice.text;
+              sceneResult.appendChild(p1);
+              var contBtn = document.createElement('button');
+              contBtn.className = 'btn continue-btn';
+              contBtn.type = 'button';
+              contBtn.textContent = 'See what happens after class';
+              contBtn.addEventListener('click', function () {
+                var r = contBtn.getBoundingClientRect();
+                burstConfetti(r.left + r.width / 2, r.top + r.height / 2, 80);
+                contBtn.remove();
+                var p2 = document.createElement('p');
+                p2.style.marginTop = '10px';
+                p2.textContent = choice.after;
+                sceneResult.appendChild(p2);
+              });
+              sceneResult.appendChild(contBtn);
+            });
+          });
+        }
+      })();
+
+      /* ---------- anime chocolate box ---------- */
+      (function () {
+        var chocoBox = document.getElementById('chocoBox');
+        var chocoMsg = document.getElementById('chocoMsg');
+        if (!chocoBox) return;
+        var opened = false;
+        var chocoLines = [
+          "Sweet for my sweet, Kowsalya.",
+          "One chocolate. Infinite love. Fair trade.",
+          "Happy birthday \u2014 you're still the best thing I ever handed a chocolate to."
+        ];
+        chocoBox.addEventListener('click', function () {
+          opened = !opened;
+          chocoBox.classList.toggle('open', opened);
+          if (opened) {
+            var r = chocoBox.getBoundingClientRect();
+            burstConfetti(r.left + r.width / 2, r.top + r.height / 2, 70);
+            chocoMsg.textContent = chocoLines[Math.floor(Math.random() * chocoLines.length)];
+          } else {
+            chocoMsg.textContent = '';
+          }
+        });
+      })();
+
+      /* ---------- love letter ---------- */
+      var letterText = "Kowsy,\n\nFour years ago I had no idea one person could change the shape of my ordinary days this much. You did, though. Quietly, and then all at once.\n\nI love the version of me that exists around you \u2014 calmer, sillier, a little braver about the things that scare me. I love that after all this time you can still make me laugh at something you've said a hundred times before.\n\nThank you for staying, for choosing this \u2014 for choosing me \u2014 on the easy days and the harder ones. I don't take one single ordinary Tuesday with you for granted.\n\nHappy birthday. Here's to being impossibly lucky, together, for a lot longer than four years.\n\nAll my love,\nArun Diwagar";
+      var letterBox = document.getElementById('letterBox');
+      var openBtn = document.getElementById('openLetter');
+      var letterOpened = false;
+      if (openBtn) {
+        openBtn.addEventListener('click', function () {
+          if (letterOpened) return;
+          letterOpened = true;
+          letterBox.classList.add('show');
+          openBtn.textContent = 'Opened \u2764\ufe0f';
+          openBtn.disabled = true;
+          var i = 0;
+          var cursor = document.createElement('span');
+          cursor.className = 'cursor';
+          cursor.textContent = ' ';
+          function typeNext() {
+            if (i <= letterText.length) {
+              letterBox.textContent = letterText.slice(0, i);
+              letterBox.appendChild(cursor);
+              i += 2;
+              setTimeout(typeNext, 18);
+            } else {
+              cursor.remove();
+            }
+          }
+          typeNext();
+        });
+      }
+
+      /* ---------- flying anime pig ---------- */
+      var pigSVG = '<svg viewBox="0 0 120 100" xmlns="http://www.w3.org/2000/svg">'
+        + '<ellipse cx="30" cy="46" rx="22" ry="14" fill="#ffb4c2" opacity="0.9" transform="rotate(-18 30 46)"/>'
+        + '<ellipse cx="90" cy="46" rx="22" ry="14" fill="#ffc6d1" opacity="0.9" transform="rotate(18 90 46)"/>'
+        + '<ellipse cx="60" cy="58" rx="34" ry="24" fill="#ffcad4"/>'
+        + '<ellipse cx="60" cy="58" rx="34" ry="24" fill="none" stroke="#c9184a" stroke-width="1.5" opacity="0.35"/>'
+        + '<circle cx="40" cy="46" r="15" fill="#ffcad4"/>'
+        + '<path d="M30 34 L26 22 L38 32 Z" fill="#ffb4c2"/>'
+        + '<path d="M50 34 L54 22 L42 32 Z" fill="#ffb4c2"/>'
+        + '<ellipse cx="34" cy="50" rx="7" ry="5" fill="#ffa8b8"/>'
+        + '<circle cx="35" cy="34" r="6" fill="#ffb4c2" opacity="0.7"/>'
+        + '<circle cx="35" cy="43" r="2" fill="#2b0f18"/>'
+        + '<circle cx="46" cy="43" r="2" fill="#2b0f18"/>'
+        + '<ellipse cx="30" cy="52" rx="3.5" ry="2.5" fill="#e88fa0" opacity="0.7"/>'
+        + '<ellipse cx="48" cy="52" rx="3.5" ry="2.5" fill="#e88fa0" opacity="0.7"/>'
+        + '</svg>';
+
+      function flyPig() {
+        var pig = document.createElement('div');
+        pig.className = 'flying-pig';
+        pig.innerHTML = pigSVG;
+        var topPos = 10 + Math.random() * 60;
+        var duration = 3.2 + Math.random() * 1.6;
+        pig.style.top = topPos + 'vh';
+        pig.style.animationDuration = duration + 's';
+        document.body.appendChild(pig);
+        setTimeout(function () { pig.remove(); }, duration * 1000 + 200);
+      }
+
+      if (wishBtnEl) {
+        wishBtnEl.addEventListener('click', function () {
+          for (var p = 0; p < 3; p++) {
+            setTimeout(flyPig, p * 260);
+          }
+        });
+      }
+    })();
+  </script>
+</body>
+
+</html>
